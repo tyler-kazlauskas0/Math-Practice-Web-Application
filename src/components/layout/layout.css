@@ -1,0 +1,99 @@
+.skip-link {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  z-index: 10;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+.app-header {
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.app-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-3) var(--page-padding);
+}
+
+.app-header__title {
+  color: inherit;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.app-header :focus-visible {
+  outline-color: var(--color-on-primary);
+}
+
+.main-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.main-nav__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-target);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius);
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.main-nav__link:hover {
+  background: rgb(255 255 255 / 0.15);
+}
+
+.main-nav__link[aria-current='page'] {
+  background: var(--color-on-primary);
+  color: var(--color-primary);
+}
+
+/* Keep all four links on one line on phones. */
+@media (max-width: 26rem) {
+  .main-nav {
+    width: 100%;
+  }
+
+  .main-nav__list {
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .main-nav__link {
+    padding: 0 var(--space-2);
+    font-size: 1rem;
+  }
+}
+
+.page-container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-5) var(--page-padding);
+}
+
+.page-container:focus {
+  outline: none;
+}

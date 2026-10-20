@@ -1,0 +1,18 @@
+.home {
+  text-align: center;
+}
+
+.home__intro {
+  max-width: 32rem;
+  margin: 0 auto var(--space-5);
+  color: var(--color-text-muted);
+}
+
+/* Stacked full-width buttons on phones; a centered column on larger screens. */
+.home__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 24rem;
+  margin: 0 auto;
+}
