@@ -23,14 +23,16 @@ npm run test:watch    # re-run tests on file changes
 ```
 src/
   assets/      Images, icons, and other static assets
-  components/  Reusable UI components
-  data/        Static data and configuration
+  components/
+    layout/    Page frame: header, navigation, page container
+    ui/        Shared UI pieces such as buttons
+  data/        Static data and configuration (e.g. route paths)
   hooks/       Custom React hooks
-  pages/       Top-level screens
+  pages/       One component per route
   styles/      Global stylesheets
   test/        Test setup (Vitest + React Testing Library)
   types/       Shared TypeScript types
   utils/       Helper functions (e.g. problem generation)
-  App.tsx      Root component
+  App.tsx      Root component and route definitions
   main.tsx     Entry point
 ```
