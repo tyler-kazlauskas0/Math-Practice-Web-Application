@@ -11,13 +11,21 @@ export interface PracticeAttempt {
   answeredAt: string
 }
 
+/** How many questions a session asks, or `'continuous'` to keep going until the player stops. */
+export type SessionLength = 5 | 10 | 20 | 'continuous'
+
+/** The choices made on the practice setup page. */
+export interface PracticeConfig {
+  /** Which operations to practice. Always has at least one entry. */
+  operations: MathOperation[]
+  difficulty: DifficultyLevel
+  sessionLength: SessionLength
+}
+
 /** A round of practice: a set of questions and the player's answers to them. */
 export interface PracticeSession {
   id: string
-  operations: MathOperation[]
-  difficulty: DifficultyLevel
-  /** How many questions the session was set up to ask. */
-  questionCount: number
+  config: PracticeConfig
   attempts: PracticeAttempt[]
   /** ISO 8601 timestamp of when the session started. */
   startedAt: string

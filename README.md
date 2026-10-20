@@ -25,6 +25,7 @@ src/
   assets/      Images, icons, and other static assets
   components/
     layout/    Page frame: header, navigation, page container
+    practice/  Practice setup controls (operation, difficulty, length)
     ui/        Shared UI pieces such as buttons
   data/        Static data and configuration (e.g. route paths)
   hooks/       Custom React hooks

@@ -1,0 +1,179 @@
+.setup-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.setup-group__legend {
+  padding: 0;
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.setup-group__hint {
+  margin: calc(-1 * var(--space-3)) 0 0;
+  color: var(--color-text-muted);
+}
+
+.setup-group__shortcut {
+  align-self: flex-start;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* Cards with longer descriptions stack in one column on phones. */
+@media (max-width: 30rem) {
+  .choice-grid--two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 48rem) {
+  .choice-grid--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.choice-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 6rem;
+  /* Extra top padding leaves room for the checkmark badge. */
+  padding: var(--space-5) var(--space-2) var(--space-3);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.choice-card:hover {
+  border-color: var(--color-primary);
+}
+
+.choice-card--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* The native input stays in the page for keyboard and screen-reader use, but is invisible. */
+.choice-card__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choice-card:has(.choice-card__input:focus-visible) {
+  outline: 4px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+.choice-card__check {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 1rem;
+  font-weight: 800;
+  visibility: hidden;
+}
+
+.choice-card--selected .choice-card__check {
+  visibility: visible;
+}
+
+.choice-card__icon {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.choice-card__label {
+  font-weight: 800;
+}
+
+.choice-card__description {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choice-card {
+    transition: none;
+  }
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.setup-form__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.setup-form__message {
+  margin: 0;
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+.setup-form__message:empty {
+  display: none;
+}
+
+.setup-form__start {
+  align-self: flex-start;
+  min-width: 14rem;
+}
+
+@media (max-width: 30rem) {
+  .setup-form__start {
+    align-self: stretch;
+    min-width: 0;
+  }
+}
+
+.config-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-5);
+}
+
+.config-summary dt {
+  font-weight: 800;
+}
+
+.config-summary dd {
+  margin: 0;
+}
