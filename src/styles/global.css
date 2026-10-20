@@ -9,6 +9,8 @@
   --color-primary-light: #eff6ff;
   --color-on-primary: #ffffff;
   --color-focus: #7c3aed;
+  --color-border: #d1d5db;
+  --color-error: #b91c1c;
 
   /* Typography: larger than usual so text is easy for young readers. */
   --font-family: ui-rounded, 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;

@@ -2,7 +2,7 @@
 export type MathOperation = 'addition' | 'subtraction' | 'multiplication' | 'division'
 
 /** How hard generated questions are (e.g. the size of the numbers used). */
-export type DifficultyLevel = 'easy' | 'medium' | 'hard'
+export type DifficultyLevel = 'beginner' | 'easy' | 'intermediate' | 'advanced'
 
 /** A single math problem, e.g. `7 × 8 = ?`. */
 export interface Question {
