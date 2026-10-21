@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../App'
 import { ROUTES } from '../data/routes'
+import { makeQuestion } from '../test/makeQuestion'
 import type { PracticeConfig } from '../types/session'
 import { SETTINGS_STORAGE_KEY } from '../utils/settingsStorage'
 
@@ -93,7 +94,8 @@ describe('PracticeSessionPage', () => {
     expect(total('Questions')).toBe('5')
     expect(total('Right')).toBe('4')
     expect(total('Wrong')).toBe('1')
-    expect(total('Score')).toBe('80%')
+    expect(total('Accuracy')).toBe('80%')
+    expect(total('To review')).toBe('1')
   })
 
   it('uses a short fade between questions only when animations are on', async () => {
@@ -110,6 +112,33 @@ describe('PracticeSessionPage', () => {
 
     expect(container.querySelector('.question-card')).not.toHaveClass('question-card--enter')
     expect(container.querySelector('.question-card')).toHaveClass('question-card--no-animation')
+  })
+})
+
+describe('mistake review', () => {
+  const mistakes = [makeQuestion(56, 'division', 7), makeQuestion(9, 'subtraction', 4)]
+
+  it('asks each saved question once, in order, then shows the summary', async () => {
+    const { user } = renderSession({ ...config, reviewQuestions: mistakes })
+    expect(screen.getByRole('heading', { level: 1, name: 'Mistake Review' })).toBeInTheDocument()
+    expect(screen.getByText('Question 1 of 2')).toBeInTheDocument()
+    expect(question()).toBe('56 ÷ 7 = ?')
+
+    await answerQuestion(user, true)
+    expect(question()).toBe('9 − 4 = ?')
+
+    await answerQuestion(user, false)
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'Mistake Review Done!' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Practice Mistakes (1)' })).toBeInTheDocument()
+  })
+
+  it('skips invalid saved questions, and goes to setup if none are left', () => {
+    renderSession({ ...config, reviewQuestions: [{ ...mistakes[0], correctAnswer: 9 }] })
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Practice Setup' })).toBeInTheDocument()
   })
 })
 

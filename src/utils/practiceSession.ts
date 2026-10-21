@@ -1,3 +1,4 @@
+import type { Question } from '../types/question'
 import type {
   PracticeAttempt,
   PracticeConfig,
@@ -7,6 +8,7 @@ import type {
 import { createId } from './id'
 import { createAnswerChoices } from './questions/answerChoices'
 import { generatePracticeQuestion } from './questions/generateQuestion'
+import { isValidQuestion } from './questions/validateQuestion'
 
 /** How many times to try for a question that differs from the previous one. */
 const MAX_REPEAT_ATTEMPTS = 10
@@ -37,16 +39,43 @@ export function createNextRound(
   return round
 }
 
-/** The number of questions in the session, or `null` for non-stop practice. */
-export function getTotalQuestions(config: PracticeConfig): number | null {
-  return config.sessionLength === 'continuous' ? null : config.sessionLength
+/**
+ * Asks a saved question again, with a new ID (so it gets a fresh card) and freshly
+ * shuffled answer choices.
+ */
+export function createReviewRound(question: Question): PracticeRound {
+  const reviewQuestion = { ...question, id: createId() }
+  return { question: reviewQuestion, choices: createAnswerChoices(reviewQuestion) }
 }
 
-/** Starts a new session with its first question. */
+/** Keeps only valid questions, e.g. from navigation state that can't be trusted. */
+export function validReviewQuestions(value: unknown): Question[] {
+  return Array.isArray(value) ? value.filter(isValidQuestion) : []
+}
+
+/**
+ * The number of questions in the session: the number of review questions in a
+ * mistake-review session, `null` for non-stop practice, otherwise the chosen length.
+ */
+export function getTotalQuestions(
+  state: Pick<PracticeSessionState, 'config' | 'reviewQuestions'>,
+): number | null {
+  if (state.reviewQuestions) return state.reviewQuestions.length
+  return state.config.sessionLength === 'continuous' ? null : state.config.sessionLength
+}
+
+/** Every question has been attempted. Never true for non-stop practice. */
+export function isSessionComplete(state: PracticeSessionState): boolean {
+  const total = getTotalQuestions(state)
+  return total !== null && state.attempts.length >= total
+}
+
+/** Starts a new session with its first question. Pass `reviewQuestions` for a mistake review. */
 export function startSession(
   config: PracticeConfig,
   round: PracticeRound | null,
   now: number,
+  reviewQuestions: Question[] | null = null,
 ): PracticeSessionState {
   return {
     id: createId(),
@@ -60,6 +89,7 @@ export function startSession(
     correctCount: 0,
     incorrectCount: 0,
     isActive: round !== null,
+    reviewQuestions,
   }
 }
 
@@ -79,9 +109,9 @@ export function hasRecordedCurrent(state: PracticeSessionState): boolean {
   return state.attempts.length > state.currentQuestionIndex
 }
 
-/** The session has asked all of its questions (never true for non-stop practice). */
+/** The current question is the session's last one (never true for non-stop practice). */
 export function isOnLastQuestion(state: PracticeSessionState): boolean {
-  const total = getTotalQuestions(state.config)
+  const total = getTotalQuestions(state)
   return total !== null && state.currentQuestionIndex >= total - 1
 }
 
@@ -114,7 +144,8 @@ export function practiceSessionReducer(
 
     case 'nextQuestion': {
       if (!hasRecordedCurrent(state)) return state
-      if (isOnLastQuestion(state)) {
+      // Done once the number attempted reaches the session length. No new question is used.
+      if (isSessionComplete(state)) {
         return { ...state, isActive: false, completedAt: new Date(action.now).toISOString() }
       }
       return {

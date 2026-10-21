@@ -3,7 +3,10 @@ import { makeQuestion } from '../test/makeQuestion'
 import type { PracticeConfig, PracticeRound, PracticeSessionState } from '../types/session'
 import {
   createNextRound,
+  createReviewRound,
+  getTotalQuestions,
   isOnLastQuestion,
+  isSessionComplete,
   practiceSessionReducer,
   startSession,
 } from './practiceSession'
@@ -105,6 +108,21 @@ describe('practiceSessionReducer', () => {
     expect(state.attempts).toHaveLength(5)
   })
 
+  it('is complete once the number attempted reaches the session length', () => {
+    let state = startSession(config, round(2, 3), 1000)
+    for (let i = 0; i < 4; i++) state = next(record(state))
+    expect(isSessionComplete(state)).toBe(false)
+
+    state = record(state)
+    expect(isSessionComplete(state)).toBe(true)
+
+    // A question offered after completion is not used.
+    const ended = next(state, round(9, 9))
+    expect(ended.currentRound?.question.displayText).not.toBe('9 + 9')
+    expect(ended.currentQuestionIndex).toBe(4)
+    expect(ended.completedAt).toBe(new Date(3000).toISOString())
+  })
+
   it('never runs out of questions in non-stop practice', () => {
     let state = startSession({ ...config, sessionLength: 'continuous' }, round(2, 3), 1000)
     for (let i = 0; i < 50; i++) state = next(record(state))
@@ -131,6 +149,41 @@ describe('practiceSessionReducer', () => {
 
     expect(state.isActive).toBe(false)
     expect(state.currentRound).toBeNull()
+  })
+})
+
+describe('mistake review sessions', () => {
+  const reviewQuestions = [round(2, 3).question, round(6, 1).question]
+
+  it('has as many questions as there are to review', () => {
+    const state = startSession(config, round(2, 3), 1000, reviewQuestions)
+
+    expect(getTotalQuestions(state)).toBe(2)
+  })
+
+  it('ends after the last review question, whatever the chosen session length', () => {
+    let state = startSession(
+      { ...config, sessionLength: 'continuous' },
+      round(2, 3),
+      1000,
+      reviewQuestions,
+    )
+    state = next(record(state), round(6, 1))
+    expect(state.isActive).toBe(true)
+
+    state = next(record(state))
+
+    expect(state.isActive).toBe(false)
+  })
+
+  it('asks a saved question again with a new id and fresh choices', () => {
+    const saved = round(7, 8).question
+    const reviewRound = createReviewRound(saved)
+
+    expect(reviewRound.question.id).not.toBe(saved.id)
+    expect(reviewRound.question.displayText).toBe(saved.displayText)
+    expect(reviewRound.choices).toContain(15)
+    expect(reviewRound.choices).toHaveLength(4)
   })
 })
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { makeQuestion } from '../test/makeQuestion'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
-import { createSessionSummary, isSessionSummary } from './sessionSummary'
+import { collectMistakes, createSessionSummary, isSessionSummary } from './sessionSummary'
 
 const attempt = (
   operation: 'addition' | 'division',
@@ -67,6 +67,27 @@ describe('createSessionSummary', () => {
       averageTimeMs: 0,
       byOperation: [],
     })
+  })
+})
+
+describe('collectMistakes', () => {
+  it('lists each question marked wrong once, in the order asked', () => {
+    const mistakes = collectMistakes([
+      attempt('division', false, 1000),
+      attempt('addition', true, 1000),
+      attempt('addition', false, 1000),
+      attempt('division', false, 1000),
+    ])
+
+    expect(mistakes.map((question) => question.displayText)).toEqual(['8 ÷ 2', '2 + 3'])
+  })
+
+  it('is included in the summary, along with whether it was a review', () => {
+    const summary = createSessionSummary(session, { isReview: true })
+
+    expect(summary.mistakes.map((question) => question.displayText)).toEqual(['2 + 3'])
+    expect(summary.isReview).toBe(true)
+    expect(createSessionSummary(session).isReview).toBe(false)
   })
 })
 
