@@ -74,9 +74,14 @@ function QuestionCardFront({
         ))}
       </div>
       <p className="question-card__hint" id={`hint-${question.id}`}>
-        {selectedAnswer === null
-          ? 'Pick an answer (or press 1, 2, 3, or 4), then flip the card.'
-          : 'Flip the card to check your answer.'}
+        {selectedAnswer === null ? (
+          <>
+            Pick an answer
+            <span className="keyboard-only"> (or press 1, 2, 3, or 4)</span>, then flip the card.
+          </>
+        ) : (
+          'Flip the card to check your answer.'
+        )}
       </p>
       <Button
         className="question-card__action"

@@ -80,6 +80,15 @@ describe('PracticeSummaryPage', () => {
     expect(table).toHaveTextContent('Division2 of 450%4.3s')
   })
 
+  it('also lists the operation results as cards, for small screens', () => {
+    renderSummary(summary)
+
+    const additionCard = screen.getByRole('heading', { level: 3, name: 'Addition' }).closest('li')!
+    expect(additionCard).toHaveTextContent('Right5 of 6')
+    expect(additionCard).toHaveTextContent('Accuracy83%')
+    expect(additionCard).toHaveTextContent('Avg. time2.5s')
+  })
+
   it('has all five actions', () => {
     renderSummary(summary)
 

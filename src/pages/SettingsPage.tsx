@@ -56,6 +56,12 @@ function SettingsPage() {
               onChange={(animationsEnabled) => save({ animationsEnabled })}
             />
             <SettingToggle
+              label="Encouraging messages"
+              description="Show a friendly message after each answer, like “Great job!” or “Good try!”."
+              checked={settings.feedbackEnabled}
+              onChange={(feedbackEnabled) => save({ feedbackEnabled })}
+            />
+            <SettingToggle
               label="Show explanations"
               description="Show how to work out the answer on the back of each card."
               checked={settings.showExplanations}

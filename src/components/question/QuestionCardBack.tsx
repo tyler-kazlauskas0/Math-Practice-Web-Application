@@ -11,6 +11,10 @@ interface QuestionCardBackProps {
   selectedAnswer: number
   /** The player's own verdict, or `null` until they choose. */
   markedCorrect: boolean | null
+  /** An encouraging message shown after marking, if feedback is on. */
+  feedback?: string | null
+  /** Whether the message may pop in (off without animation). */
+  animate?: boolean
   isLastQuestion: boolean
   onMark: (markedCorrect: boolean) => void
   onNext: () => void
@@ -25,6 +29,8 @@ function QuestionCardBack({
   totalQuestions,
   selectedAnswer,
   markedCorrect,
+  feedback = null,
+  animate = false,
   isLastQuestion,
   onMark,
   onNext,
@@ -79,6 +85,17 @@ function QuestionCardBack({
           </Button>
         </div>
       </div>
+      {hasMarked && feedback && (
+        // Read out through the card's announcement, so hidden from screen readers here.
+        <p
+          className={`card-feedback card-feedback--${markedCorrect ? 'positive' : 'supportive'}${
+            animate ? ' card-feedback--pop' : ''
+          }`}
+          aria-hidden="true"
+        >
+          <span className="card-feedback__icon">{markedCorrect ? '🌟' : '💪'}</span> {feedback}
+        </p>
+      )}
       {hasMarked && (
         <Button className="question-card__action" ref={nextButtonRef} onClick={onNext}>
           {isLastQuestion ? 'Finish' : 'Next Question'}
