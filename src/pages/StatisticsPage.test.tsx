@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 import { saveAttempt, saveSession, type StoredSession } from '../services/practiceHistory'
 import { makeQuestion } from '../test/makeQuestion'
@@ -10,11 +11,7 @@ import type { DifficultyLevel, Question } from '../types/question'
 
 function renderStatistics() {
   const user = userEvent.setup()
-  render(
-    <MemoryRouter initialEntries={[ROUTES.statistics]}>
-      <App />
-    </MemoryRouter>,
-  )
+  render(<App router={createMemoryRouter(appRoutes, { initialEntries: [ROUTES.statistics] })} />)
   return user
 }
 

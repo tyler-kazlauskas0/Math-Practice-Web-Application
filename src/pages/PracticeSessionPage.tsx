@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router'
+import { Navigate, useBlocker, useLocation, useNavigate } from 'react-router'
 import PageContainer from '../components/layout/PageContainer'
-import QuestionCard from '../components/question/QuestionCard'
+import QuestionCard, { type QuestionCardState } from '../components/question/QuestionCard'
 import EndSessionControl from '../components/session/EndSessionControl'
+import LeaveSessionDialog from '../components/session/LeaveSessionDialog'
 import SessionProgress from '../components/session/SessionProgress'
 import '../components/session/session.css'
 import ButtonLink from '../components/ui/ButtonLink'
@@ -12,6 +13,12 @@ import { usePracticeSession } from '../hooks/usePracticeSession'
 import { useMistakePatterns } from '../hooks/useMistakePatterns'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { useSettings } from '../hooks/useSettings'
+import {
+  clearActiveSession,
+  loadActiveSession,
+  saveActiveSession,
+  type SavedActiveSession,
+} from '../services/activeSession'
 import type { Question } from '../types/question'
 import type { PracticeConfig, PracticeSessionRequest } from '../types/session'
 import { isPracticeConfig } from '../utils/practiceConfig'
@@ -27,8 +34,15 @@ import {
 import { createSessionSummary } from '../utils/sessionSummary'
 
 function PracticeSessionPage() {
-  const { state } = useLocation()
+  const { state, key: locationKey } = useLocation()
   const { patterns } = useMistakePatterns()
+  // A saved session in progress is resumed after a refresh (same history entry), or when this
+  // page is opened without a new session to start (e.g. from a Resume button or a bookmark).
+  const [resumed] = useState(() => {
+    const saved = loadActiveSession()
+    if (!saved) return null
+    return saved.locationKey === locationKey || !isPracticeConfig(state) ? saved : null
+  })
   // Checked once, when the page opens: mastering the last mistake mid-session must not
   // send the player away before they see their summary.
   const [hadActiveMistakes] = useState(() => activePatterns(patterns).length > 0)
@@ -38,6 +52,16 @@ function PracticeSessionPage() {
   const backToSetup = (
     <Navigate to={ROUTES.practiceSetup} replace state={{ reason: MISSING_SESSION_REASON }} />
   )
+  if (resumed) {
+    return (
+      <PracticeSession
+        config={resumed.session.config}
+        reviewQuestions={null}
+        mistakeReview={false}
+        resumed={resumed}
+      />
+    )
+  }
   if (!isPracticeConfig(state)) return backToSetup
 
   const { operations, difficulty, sessionLength, reviewQuestions, mode } =
@@ -62,11 +86,19 @@ interface PracticeSessionProps {
   config: PracticeConfig
   reviewQuestions: Question[] | null
   mistakeReview: boolean
+  /** A saved session to continue instead of starting a new one. */
+  resumed?: SavedActiveSession | null
 }
 
 /** Runs a practice session: question cards one at a time, then the summary page. */
-function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSessionProps) {
+function PracticeSession({
+  config,
+  reviewQuestions,
+  mistakeReview,
+  resumed = null,
+}: PracticeSessionProps) {
   const navigate = useNavigate()
+  const { key: locationKey } = useLocation()
   const { settings } = useSettings()
   const { patterns } = useMistakePatterns()
   // Animate only if both the app setting and the device allow it.
@@ -86,6 +118,40 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
   const { state, recordResult, nextQuestion, endSession } = usePracticeSession(config, {
     reviewQuestions,
     mistakeReview,
+    restored: resumed?.session,
+  })
+
+  // ---- Saving the session in progress, so a refresh or closed tab doesn't lose it ----
+  const cardState = useRef(resumed?.card ?? null)
+  const stateRef = useRef(state)
+  const save = useCallback(() => {
+    saveActiveSession({ locationKey, session: stateRef.current, card: cardState.current })
+  }, [locationKey])
+  useEffect(() => {
+    stateRef.current = state
+    save()
+  }, [state, save])
+  const questionId = state.currentRound?.question.id
+  const handleCardChange = useCallback(
+    (card: QuestionCardState) => {
+      if (!questionId) return
+      cardState.current = { questionId, ...card }
+      save()
+    },
+    [questionId, save],
+  )
+
+  // ---- Asking before leaving a session in progress ----
+  const [isLeaving, setIsLeaving] = useState(false)
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    const leaving = state.isActive && currentLocation.pathname !== nextLocation.pathname
+    if (!leaving) return false
+    // Leaving before answering anything: nothing to lose or resume, so just go.
+    if (state.attempts.length === 0) {
+      clearActiveSession()
+      return false
+    }
+    return true
   })
   const totalQuestions = getTotalQuestions(state)
   const isReview = isReviewSession(state)
@@ -95,6 +161,12 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
 
   useEffect(() => {
     if (!ended) return
+    clearActiveSession()
+    // Ending in order to leave: go where the player was heading, not to the summary.
+    if (isLeaving) {
+      if (blocker.state === 'blocked') blocker.proceed()
+      return
+    }
     // Mistakes this session's review questions came from that are now mastered.
     const practiced = new Set(state.attempts.map((attempt) => attempt.question.mistakePatternId))
     const masteredCount = patterns.filter(
@@ -108,7 +180,7 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
       replace: true,
       state: createSessionSummary(state, { isReview, masteredCount }),
     })
-  }, [ended, isReview, navigate, patterns, state])
+  }, [blocker, ended, isLeaving, isReview, navigate, patterns, state])
 
   if (state.currentRound === null) {
     return (
@@ -122,6 +194,18 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
   if (ended) return null
 
   const questionNumber = state.currentQuestionIndex + 1
+  // A restored card reopens as it was: answer chosen, flipped, and marked if already recorded.
+  const savedCard = resumed?.card
+  const recorded = hasRecordedCurrent(state) ? state.attempts[state.currentQuestionIndex] : null
+  const restoredCard =
+    savedCard && savedCard.questionId === state.currentRound.question.id
+      ? {
+          selectedAnswer: recorded?.userAnswer ?? savedCard.selectedAnswer,
+          isCardFlipped: recorded ? true : savedCard.isCardFlipped,
+          markedCorrect: recorded?.isCorrect ?? null,
+          timeTakenMs: recorded?.timeTakenMs,
+        }
+      : undefined
   // For screen readers: progress after each answer is marked, and each new question.
   const announcement = hasRecordedCurrent(state)
     ? totalQuestions === null
@@ -135,6 +219,21 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
     <PageContainer title={title}>
       <div className="practice-session">
         <LiveAnnouncement message={announcement} />
+        {resumed && state.attempts.length === resumed.session.attempts.length && (
+          <p className="session-resumed" role="status">
+            Welcome back! You’re right where you left off.
+          </p>
+        )}
+        {blocker.state === 'blocked' && (
+          <LeaveSessionDialog
+            answered={answered}
+            onStay={() => blocker.reset()}
+            onLeave={() => {
+              setIsLeaving(true)
+              endSession()
+            }}
+          />
+        )}
         <SessionProgress answered={answered} total={totalQuestions} correct={state.correctCount} />
         <QuestionCard
           // A new key per question gives a fresh card: nothing selected, not flipped.
@@ -150,6 +249,8 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
           onResult={recordResult}
           onNext={nextQuestion}
           getFeedback={getFeedback}
+          onStateChange={handleCardChange}
+          initialState={restoredCard}
         />
         <div className="session-actions">
           <EndSessionControl answered={answered} onEnd={endSession} />

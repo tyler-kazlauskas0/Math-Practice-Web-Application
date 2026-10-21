@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 import { loadMistakePatterns, saveMistakePatterns } from '../services/mistakePatterns'
 import { loadAttempts } from '../services/practiceHistory'
@@ -15,9 +16,7 @@ type User = ReturnType<typeof userEvent.setup>
 function startApp(path: string, state?: unknown) {
   const user = userEvent.setup()
   const view = render(
-    <MemoryRouter initialEntries={[{ pathname: path, state }]}>
-      <App />
-    </MemoryRouter>,
+    <App router={createMemoryRouter(appRoutes, { initialEntries: [{ pathname: path, state }] })} />,
   )
   return { user, ...view }
 }

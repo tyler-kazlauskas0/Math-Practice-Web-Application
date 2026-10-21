@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 import { makeQuestion } from '../test/makeQuestion'
 import type { SessionSummary } from '../types/statistics'
@@ -10,9 +11,11 @@ import type { SessionSummary } from '../types/statistics'
 function renderSummary(state: unknown) {
   const user = userEvent.setup()
   render(
-    <MemoryRouter initialEntries={[{ pathname: ROUTES.practiceSummary, state }]}>
-      <App />
-    </MemoryRouter>,
+    <App
+      router={createMemoryRouter(appRoutes, {
+        initialEntries: [{ pathname: ROUTES.practiceSummary, state }],
+      })}
+    />,
   )
   return user
 }

@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 import { saveMistakePatterns } from '../services/mistakePatterns'
 import { saveAttempt, saveSession } from '../services/practiceHistory'
@@ -11,11 +12,7 @@ import { makeQuestion } from '../test/makeQuestion'
 
 function startApp(path: string) {
   const user = userEvent.setup()
-  render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>,
-  )
+  render(<App router={createMemoryRouter(appRoutes, { initialEntries: [path] })} />)
   return user
 }
 

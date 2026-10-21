@@ -1,17 +1,14 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 
 function renderSetupPage() {
   const user = userEvent.setup()
-  render(
-    <MemoryRouter initialEntries={[ROUTES.practiceSetup]}>
-      <App />
-    </MemoryRouter>,
-  )
+  render(<App router={createMemoryRouter(appRoutes, { initialEntries: [ROUTES.practiceSetup] })} />)
   return user
 }
 
