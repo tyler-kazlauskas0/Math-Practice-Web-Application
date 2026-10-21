@@ -14,9 +14,13 @@ npm run lint          # check code with ESLint
 npm run lint:fix      # auto-fix ESLint problems
 npm run format        # format all files with Prettier
 npm run format:check  # check formatting without changing files
-npm test              # run the test suite once (Vitest)
+npm test              # run the unit, component, and integration tests once (Vitest)
 npm run test:watch    # re-run tests on file changes
+npm run test:coverage # run the tests with a coverage report
+npm run test:e2e      # real-browser tests: zoom, contrast, focus, motion (Playwright)
 ```
+
+See [docs/TESTING.md](docs/TESTING.md) for what is tested where, and the accessibility review.
 
 ## Project structure
 
@@ -37,13 +41,16 @@ src/
   pages/       One component per route
   services/    Saved data: localStorage wrapper, data versioning, settings, history, mistakes
   styles/      Global stylesheets
-  test/        Test setup (Vitest + React Testing Library)
+  integration/ Whole-journey tests, from the home page through practice and statistics
+  test/        Test setup and shared test helpers (Vitest + React Testing Library)
   types/       Shared TypeScript types
   utils/       Helper functions (random numbers, IDs, session logic, mistake priority)
     questions/ Math question generation, validation, and questions similar to past mistakes
   App.tsx      Root component (settings, mistakes, and the router)
   routes.tsx   Every page's address (a React Router data router, needed for leave warnings)
   main.tsx     Entry point
+e2e/           Real-browser tests (Playwright)
+docs/          Testing guide and accessibility review
 ```
 
 ## Saved data

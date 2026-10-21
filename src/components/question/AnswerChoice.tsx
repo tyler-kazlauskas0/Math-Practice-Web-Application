@@ -8,13 +8,15 @@ interface AnswerChoiceProps {
   onSelect: (value: number) => void
 }
 
-/** One multiple-choice answer, shown as a large button. */
+/**
+ * One multiple-choice answer, shown as a large button. Its name ("Answer 56") comes from its
+ * content, so the visible number is part of it, as voice control needs.
+ */
 function AnswerChoice({ value, shortcut, isSelected, isLocked, onSelect }: AnswerChoiceProps) {
   return (
     <button
       type="button"
       className={`answer-choice${isSelected ? ' answer-choice--selected' : ''}`}
-      aria-label={`Answer ${value}`}
       aria-pressed={isSelected}
       aria-keyshortcuts={shortcut ? String(shortcut) : undefined}
       disabled={isLocked}
@@ -30,7 +32,7 @@ function AnswerChoice({ value, shortcut, isSelected, isLocked, onSelect }: Answe
           ✓
         </span>
       )}
-      {value}
+      <span className="visually-hidden">Answer</span> {value}
     </button>
   )
 }
