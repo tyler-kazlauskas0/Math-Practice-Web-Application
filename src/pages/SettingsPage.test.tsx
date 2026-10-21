@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router'
 import { beforeEach, describe, expect, it } from 'vitest'
 import App from '../App'
 import { ROUTES } from '../data/routes'
-import { SETTINGS_STORAGE_KEY } from '../utils/settingsStorage'
+import { SETTINGS_STORAGE_KEY } from '../services/settingsStorage'
 
 describe('SettingsPage', () => {
   beforeEach(() => localStorage.clear())

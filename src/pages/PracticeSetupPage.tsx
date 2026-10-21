@@ -6,19 +6,27 @@ import OperationSelector from '../components/practice/OperationSelector'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
 import '../components/practice/practice.css'
 import Button from '../components/ui/Button'
-import { DEFAULT_PRACTICE_CONFIG } from '../data/practiceOptions'
 import { MISSING_SESSION_REASON, ROUTES } from '../data/routes'
+import { useSettings } from '../hooks/useSettings'
 import type { PracticeConfig } from '../types/session'
 import { isPracticeConfig } from '../utils/practiceConfig'
 
 function PracticeSetupPage() {
   const navigate = useNavigate()
+  const { settings, updateSettings } = useSettings()
   const { state } = useLocation()
   const navigationState = state as { reason?: unknown; config?: unknown } | null
   const cameFromMissingSession = navigationState?.reason === MISSING_SESSION_REASON
-  // Start from the previous session's choices when coming from the summary's Change Settings.
+  // Start from the previous session's choices when coming from the summary's Change Settings,
+  // otherwise from the choices saved last time.
   const [config, setConfig] = useState<PracticeConfig>(() =>
-    isPracticeConfig(navigationState?.config) ? navigationState.config : DEFAULT_PRACTICE_CONFIG,
+    isPracticeConfig(navigationState?.config)
+      ? navigationState.config
+      : {
+          operations: settings.enabledOperations,
+          difficulty: settings.difficulty,
+          sessionLength: settings.sessionLength,
+        },
   )
   const hasOperations = config.operations.length > 0
 
@@ -34,6 +42,12 @@ function PracticeSetupPage() {
         onSubmit={(event) => {
           event.preventDefault()
           if (!hasOperations) return
+          // Remember these choices for next time.
+          updateSettings({
+            enabledOperations: config.operations,
+            difficulty: config.difficulty,
+            sessionLength: config.sessionLength,
+          })
           navigate(ROUTES.practiceSession, { state: config })
         }}
       >

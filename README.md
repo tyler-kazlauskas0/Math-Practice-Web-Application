@@ -33,11 +33,27 @@ src/
   data/        Static data and configuration (e.g. route paths)
   hooks/       Custom React hooks (e.g. useSettings)
   pages/       One component per route
+  services/    Saved data: localStorage wrapper, data versioning, settings, practice history
   styles/      Global stylesheets
   test/        Test setup (Vitest + React Testing Library)
   types/       Shared TypeScript types
-  utils/       Helper functions (random numbers, IDs)
+  utils/       Helper functions (random numbers, IDs, session logic)
     questions/ Math question generation and validation
   App.tsx      Root component and route definitions
   main.tsx     Entry point
 ```
+
+## Saved data
+
+Everything is saved in the browser's `localStorage` under keys starting with `math-practice:`.
+Nothing is sent to a server.
+
+| Key                             | Contents                                                        |
+| ------------------------------- | --------------------------------------------------------------- |
+| `math-practice:schema-version`  | Version of the saved data format (see `src/services/schema.ts`) |
+| `math-practice:settings`        | Settings and the last practice choices                          |
+| `math-practice:sessions`        | The newest 100 practice sessions (without their answers)        |
+| `math-practice:attempts`        | Every answer from those sessions, up to 5,000                   |
+| `math-practice:history-archive` | Totals for older sessions that are no longer kept in full       |
+
+When the format changes, increase `CURRENT_SCHEMA_VERSION` and add a migration to `MIGRATIONS`.

@@ -1,4 +1,5 @@
-import { useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
+import { saveAttempt, saveSession, toStoredSession } from '../services/practiceHistory'
 import type { Question } from '../types/question'
 import type { PracticeConfig, PracticeRound, PracticeSessionState } from '../types/session'
 import {
@@ -42,6 +43,15 @@ export function usePracticeSession(
       : tryCreate(() => createRound(config))
     return startSession(config, first, Date.now(), reviewQuestions)
   })
+
+  // Save each answer as soon as it's recorded, and keep the session record up to date, so
+  // nothing is lost if the browser is closed mid-session. Sessions with no answers aren't saved.
+  useEffect(() => {
+    const latest = state.attempts.at(-1)
+    if (!latest) return
+    saveAttempt({ ...latest, sessionId: state.id })
+    saveSession(toStoredSession(state))
+  }, [state])
 
   return {
     state,

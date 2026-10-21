@@ -6,7 +6,7 @@ import App from '../App'
 import { ROUTES } from '../data/routes'
 import { makeQuestion } from '../test/makeQuestion'
 import type { PracticeConfig } from '../types/session'
-import { SETTINGS_STORAGE_KEY } from '../utils/settingsStorage'
+import { SETTINGS_STORAGE_KEY } from '../services/settingsStorage'
 
 type User = ReturnType<typeof userEvent.setup>
 
