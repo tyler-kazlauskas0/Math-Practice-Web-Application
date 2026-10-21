@@ -21,6 +21,24 @@ export type ReadResult<T> =
 export type WriteResult =
   { ok: true } | { ok: false; reason: 'unavailable' | 'quota-exceeded' | 'unknown' }
 
+/** Why saving failed: storage is blocked (e.g. some private-browsing modes) or full. */
+export type StorageProblem = 'unavailable' | 'quota-exceeded'
+
+const problemListeners = new Set<(problem: StorageProblem) => void>()
+
+/**
+ * Calls `listener` whenever saving fails because storage is blocked or full, so the app can
+ * explain it to the player. Returns a function that stops listening.
+ */
+export function onStorageProblem(listener: (problem: StorageProblem) => void): () => void {
+  problemListeners.add(listener)
+  return () => problemListeners.delete(listener)
+}
+
+function reportProblem(problem: StorageProblem) {
+  problemListeners.forEach((listener) => listener(problem))
+}
+
 /** Turns parsed JSON into the expected type, or returns `null` if it doesn't fit. */
 export type Parser<T> = (data: unknown) => T | null
 
@@ -66,12 +84,19 @@ export function readText(key: string): ReadResult<string> {
 /** Writes a raw string. */
 export function writeText(key: string, value: string): WriteResult {
   const storage = getStorage()
-  if (!storage) return { ok: false, reason: 'unavailable' }
+  if (!storage) {
+    reportProblem('unavailable')
+    return { ok: false, reason: 'unavailable' }
+  }
   try {
     storage.setItem(STORAGE_PREFIX + key, value)
     return { ok: true }
   } catch (error) {
-    return { ok: false, reason: isQuotaExceededError(error) ? 'quota-exceeded' : 'unknown' }
+    if (isQuotaExceededError(error)) {
+      reportProblem('quota-exceeded')
+      return { ok: false, reason: 'quota-exceeded' }
+    }
+    return { ok: false, reason: 'unknown' }
   }
 }
 

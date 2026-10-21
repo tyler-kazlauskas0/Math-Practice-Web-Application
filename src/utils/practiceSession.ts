@@ -9,18 +9,44 @@ import type {
 import { createId } from './id'
 import { createAnswerChoices } from './questions/answerChoices'
 import { generatePracticeQuestion } from './questions/generateQuestion'
+import { logDevError } from './devLog'
 import { activePatterns } from './mistakePatterns'
-import type { RandomSource } from './random'
+import { shuffle, type RandomSource } from './random'
+import { createFallbackQuestion } from './questions/fallbackQuestion'
 import { generateSimilarQuestion } from './questions/similarQuestions'
 import { isValidQuestion } from './questions/validateQuestion'
 
 /** How many times to try for a question that differs from the previous one. */
 const MAX_REPEAT_ATTEMPTS = 10
 
-/** Creates a question and its answer choices. Throws if no valid question can be made. */
+/** Answer choices for a question, or a simple safe set if making distractors fails. */
+export function choicesFor(question: Question): number[] {
+  try {
+    return createAnswerChoices(question)
+  } catch (error) {
+    logDevError(
+      `Couldn't make answer choices for ${question.displayText}; using simple ones`,
+      error,
+    )
+    const answer = question.correctAnswer
+    return shuffle([answer, answer + 1, answer + 2, answer + 3])
+  }
+}
+
+/**
+ * Creates a question and its answer choices. Generated questions are validated and retried
+ * (see `generateValidQuestion`); if that still fails, a simple fallback question is used so
+ * practice can continue.
+ */
 export function createRound(config: PracticeConfig): PracticeRound {
-  const question = generatePracticeQuestion(config.operations, config.difficulty)
-  return { question, choices: createAnswerChoices(question) }
+  let question: Question
+  try {
+    question = generatePracticeQuestion(config.operations, config.difficulty)
+  } catch (error) {
+    logDevError('Question generation failed; using a fallback question', error)
+    question = createFallbackQuestion(config.operations[0] ?? 'addition', config.difficulty)
+  }
+  return { question, choices: choicesFor(question) }
 }
 
 /**
@@ -49,7 +75,7 @@ export function createNextRound(
  */
 export function createReviewRound(question: Question): PracticeRound {
   const reviewQuestion = { ...question, id: createId() }
-  return { question: reviewQuestion, choices: createAnswerChoices(reviewQuestion) }
+  return { question: reviewQuestion, choices: choicesFor(reviewQuestion) }
 }
 
 /**
@@ -72,7 +98,7 @@ export function createMistakeReviewRound(
     const pattern = active.get(rotation[(turn + i) % rotation.length])!
     const similar = generateSimilarQuestion(pattern, { recentQuestions, random })
     if (similar) {
-      return { question: similar.question, choices: createAnswerChoices(similar.question) }
+      return { question: similar.question, choices: choicesFor(similar.question) }
     }
   }
   return null

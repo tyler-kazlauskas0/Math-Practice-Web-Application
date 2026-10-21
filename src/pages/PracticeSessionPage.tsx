@@ -7,6 +7,7 @@ import LeaveSessionDialog from '../components/session/LeaveSessionDialog'
 import SessionProgress from '../components/session/SessionProgress'
 import '../components/session/session.css'
 import ButtonLink from '../components/ui/ButtonLink'
+import ErrorMessage from '../components/ui/ErrorMessage'
 import LiveAnnouncement from '../components/ui/LiveAnnouncement'
 import { MISSING_SESSION_REASON, ROUTES } from '../data/routes'
 import { usePracticeSession } from '../hooks/usePracticeSession'
@@ -185,8 +186,13 @@ function PracticeSession({
   if (state.currentRound === null) {
     return (
       <PageContainer title={title}>
-        <p role="alert">Something went wrong while making a question. Please try again.</p>
-        <ButtonLink to={ROUTES.practiceSetup}>Back to Setup</ButtonLink>
+        <ErrorMessage
+          title="We couldn’t make a question"
+          actions={<ButtonLink to={ROUTES.practiceSetup}>Back to Setup</ButtonLink>}
+        >
+          <p>Something went wrong while making the next question. It’s not your fault!</p>
+          <p>Your answers so far are saved. Try setting up practice again.</p>
+        </ErrorMessage>
       </PageContainer>
     )
   }
