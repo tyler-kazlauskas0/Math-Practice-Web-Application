@@ -7,6 +7,8 @@ import './question.css'
 export interface QuestionCardResult {
   selectedAnswer: number
   markedCorrect: boolean
+  /** Time from the card appearing to flipping it, in milliseconds. */
+  timeTakenMs: number
 }
 
 interface QuestionCardProps {
@@ -20,8 +22,12 @@ interface QuestionCardProps {
   animate: boolean
   /** Move keyboard focus to the question when the card appears. Use for every question after the first. */
   autoFocus?: boolean
-  /** Called when the player is done with this card and presses Next or Finish. */
-  onComplete: (result: QuestionCardResult) => void
+  /** Fade the card in. Use for every question after the first. Skipped when `animate` is false. */
+  enterTransition?: boolean
+  /** Called once, when the player marks the answer right or wrong. */
+  onResult: (result: QuestionCardResult) => void
+  /** Called when the player presses Next Question or Finish. */
+  onNext: () => void
 }
 
 /**
@@ -38,15 +44,23 @@ function QuestionCard({
   isLastQuestion,
   animate,
   autoFocus = false,
-  onComplete,
+  enterTransition = false,
+  onResult,
+  onNext,
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isCardFlipped, setIsCardFlipped] = useState(false)
   const [markedCorrect, setMarkedCorrect] = useState<boolean | null>(null)
+  const [timeTakenMs, setTimeTakenMs] = useState(0)
+  const shownAtRef = useRef(0)
 
   const frontHeadingRef = useRef<HTMLHeadingElement>(null)
   const backHeadingRef = useRef<HTMLHeadingElement>(null)
   const nextButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    shownAtRef.current = Date.now()
+  }, [])
 
   useEffect(() => {
     if (autoFocus) frontHeadingRef.current?.focus()
@@ -65,6 +79,7 @@ function QuestionCard({
     'question-card',
     isCardFlipped && 'question-card--flipped',
     !animate && 'question-card--no-animation',
+    animate && enterTransition && 'question-card--enter',
   ]
     .filter(Boolean)
     .join(' ')
@@ -89,7 +104,9 @@ function QuestionCard({
               if (!isCardFlipped) setSelectedAnswer(answer)
             }}
             onFlip={() => {
-              if (selectedAnswer !== null) setIsCardFlipped(true)
+              if (selectedAnswer === null) return
+              setTimeTakenMs(Date.now() - shownAtRef.current)
+              setIsCardFlipped(true)
             }}
             headingRef={frontHeadingRef}
           />
@@ -109,10 +126,12 @@ function QuestionCard({
               markedCorrect={markedCorrect}
               isLastQuestion={isLastQuestion}
               onMark={(value) => {
-                if (markedCorrect === null) setMarkedCorrect(value)
+                if (markedCorrect !== null) return
+                setMarkedCorrect(value)
+                onResult({ selectedAnswer, markedCorrect: value, timeTakenMs })
               }}
               onNext={() => {
-                if (markedCorrect !== null) onComplete({ selectedAnswer, markedCorrect })
+                if (markedCorrect !== null) onNext()
               }}
               headingRef={backHeadingRef}
               nextButtonRef={nextButtonRef}

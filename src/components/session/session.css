@@ -1,0 +1,135 @@
+.practice-session {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.session-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.session-progress__track {
+  height: 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+.session-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-success);
+  transition: width 0.3s ease-out;
+}
+
+.session-progress__label,
+.session-progress__count {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .session-progress__fill {
+    transition: none;
+  }
+}
+
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.end-session-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 36rem;
+  padding: var(--space-4);
+  border: 3px solid var(--color-error);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.end-session-confirm p {
+  margin: 0;
+}
+
+.end-session-confirm__title {
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.end-session-confirm__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+/* ---- Summary ---- */
+
+.summary-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+}
+
+.summary-totals__item {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  padding: var(--space-3);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.summary-totals dt {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.summary-totals dd {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-table-wrap {
+  overflow-x: auto;
+  margin-bottom: var(--space-5);
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-table th,
+.summary-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid var(--color-border);
+  text-align: left;
+}
+
+.summary-table td,
+.summary-table thead th:not(:first-child) {
+  text-align: right;
+}

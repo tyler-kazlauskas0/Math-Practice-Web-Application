@@ -23,7 +23,6 @@ describe('App', () => {
 
   it.each([
     [ROUTES.practiceSetup, 'Practice Setup'],
-    [ROUTES.practiceSession, 'Practice'],
     [ROUTES.practiceSummary, 'Practice Summary'],
     [ROUTES.statistics, 'Statistics'],
     [ROUTES.settings, 'Settings'],
@@ -31,6 +30,12 @@ describe('App', () => {
     renderAt(path)
 
     expect(screen.getByRole('heading', { level: 1, name: heading })).toBeInTheDocument()
+  })
+
+  it('sends the practice session page to setup when there is no session', () => {
+    renderAt(ROUTES.practiceSession)
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Practice Setup' })).toBeInTheDocument()
   })
 
   it('shows a not-found page for unknown routes', () => {
