@@ -27,7 +27,7 @@ export const OPERATION_OPTIONS: OperationOption[] = [
   { value: 'division', label: 'Division', symbol: '÷' },
 ]
 
-/** Difficulty levels from easiest to hardest. Question generation follows these descriptions. */
+/** Difficulty levels from easiest to hardest. Keep descriptions in sync with `DIFFICULTY_RULES`. */
 export const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   {
     value: 'beginner',
@@ -47,7 +47,7 @@ export const DIFFICULTY_OPTIONS: DifficultyOption[] = [
   {
     value: 'advanced',
     label: 'Advanced',
-    description: 'Numbers up to 1,000. Bigger times tables.',
+    description: 'Numbers up to 1,000. Times tables up to 12 × 50.',
   },
 ]
 
