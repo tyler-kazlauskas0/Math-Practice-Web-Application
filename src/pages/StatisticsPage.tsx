@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PageContainer from '../components/layout/PageContainer'
+import MistakeOverview from '../components/statistics/MistakeOverview'
 import RecentSessions from '../components/statistics/RecentSessions'
 import ResetStatistics from '../components/statistics/ResetStatistics'
 import StatCard from '../components/statistics/StatCard'
@@ -10,9 +11,10 @@ import { DIFFICULTY_OPTIONS, OPERATION_OPTIONS } from '../data/practiceOptions'
 import { ROUTES } from '../data/routes'
 import { RECENT_SESSION_COUNT, useStatistics } from '../hooks/useStatistics'
 import { formatPercent } from '../utils/format'
+import { mostMissedOperations } from '../utils/mistakeStatistics'
 
 function StatisticsPage() {
-  const { statistics, recentSessions, resetStatistics } = useStatistics()
+  const { statistics, recentSessions, resetStatistics, mistakeSummary, patterns } = useStatistics()
   const [justReset, setJustReset] = useState(false)
 
   if (statistics.totalAttempts === 0) {
@@ -76,6 +78,15 @@ function StatisticsPage() {
               />
             ))}
           </div>
+        </section>
+
+        <section className="statistics-section" aria-labelledby="mistakes-heading">
+          <h2 id="mistakes-heading">Mistakes</h2>
+          <MistakeOverview
+            summary={mistakeSummary}
+            patterns={patterns}
+            mostMissedOperations={mostMissedOperations(statistics.byOperation)}
+          />
         </section>
 
         <section className="statistics-section" aria-labelledby="recent-heading">

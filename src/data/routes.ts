@@ -5,6 +5,7 @@ export const ROUTES = {
   practiceSession: '/practice/session',
   practiceSummary: '/practice/summary',
   statistics: '/statistics',
+  mistakes: '/statistics/mistakes',
   settings: '/settings',
 } as const
 
