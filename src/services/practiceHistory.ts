@@ -189,19 +189,22 @@ export function saveSession(session: StoredSession): WriteResult {
   return writeList(SESSIONS_KEY, sessions)
 }
 
-/** Saves one completed attempt. Saving the same attempt twice has no effect. */
-export function saveAttempt(attempt: StoredAttempt): WriteResult {
+/**
+ * Saves one completed attempt. Saving the same attempt twice has no effect; `isNew` says
+ * whether this call added it, so callers can react to each attempt exactly once.
+ */
+export function saveAttempt(attempt: StoredAttempt): WriteResult & { isNew: boolean } {
   migrateStorage()
   const attempts = readList(ATTEMPTS_KEY, isStoredAttempt)
   const isDuplicate = attempts.some(
     (saved) => saved.sessionId === attempt.sessionId && saved.question.id === attempt.question.id,
   )
-  if (isDuplicate) return { ok: true }
+  if (isDuplicate) return { ok: true, isNew: false }
 
   attempts.push(attempt)
   const removed = attempts.splice(0, Math.max(0, attempts.length - MAX_STORED_ATTEMPTS))
   if (removed.length > 0) writeJson(ARCHIVE_KEY, addToArchive(readArchive(), removed))
-  return writeList(ATTEMPTS_KEY, attempts)
+  return { ...writeList(ATTEMPTS_KEY, attempts), isNew: true }
 }
 
 /** The most recent sessions, newest first. */

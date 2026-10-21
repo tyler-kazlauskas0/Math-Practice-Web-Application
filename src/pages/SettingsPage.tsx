@@ -8,6 +8,7 @@ import SessionLengthSelector from '../components/practice/SessionLengthSelector'
 import ClearAllData from '../components/settings/ClearAllData'
 import SettingToggle from '../components/settings/SettingToggle'
 import { DATA_CLEARED_REASON, ROUTES } from '../data/routes'
+import { useMistakePatterns } from '../hooks/useMistakePatterns'
 import { useSettings } from '../hooks/useSettings'
 import { clearAllAppData } from '../services/storage'
 import type { MathOperation } from '../types/question'
@@ -16,6 +17,7 @@ import './SettingsPage.css'
 function SettingsPage() {
   const navigate = useNavigate()
   const { settings, updateSettings, resetSettings } = useSettings()
+  const { clearPatterns } = useMistakePatterns()
   // Operations are only saved when at least one is picked, so the shown choice can
   // briefly differ from the saved one.
   const [operations, setOperations] = useState<MathOperation[]>(settings.enabledOperations)
@@ -103,6 +105,7 @@ function SettingsPage() {
             onClear={() => {
               clearAllAppData()
               resetSettings()
+              clearPatterns()
               navigate(ROUTES.home, { state: { reason: DATA_CLEARED_REASON } })
             }}
           />
