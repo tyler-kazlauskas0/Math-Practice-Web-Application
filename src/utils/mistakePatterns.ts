@@ -8,6 +8,22 @@ import { isValidQuestion } from './questions/validateQuestion'
 /** How many of a pattern's most recent wrong answers are kept. */
 export const MAX_SAVED_WRONG_ANSWERS = 5
 
+/** Related questions answered correctly in a row needed to master a mistake, unless changed in Settings. */
+export const DEFAULT_MASTERY_THRESHOLD = 3
+
+/** The thresholds the Settings page offers. */
+export const MASTERY_THRESHOLD_OPTIONS = [2, 3, 4, 5] as const
+
+export const isMasteryThreshold = (value: unknown): value is number =>
+  MASTERY_THRESHOLD_OPTIONS.includes(value as (typeof MASTERY_THRESHOLD_OPTIONS)[number])
+
+/** Mastered patterns are left out of mistake review until the fact is missed again. */
+export const isMastered = (pattern: MistakePattern) => pattern.masteredAt !== null
+
+/** Patterns that still need review. */
+export const activePatterns = (patterns: MistakePattern[]) =>
+  patterns.filter((pattern) => !isMastered(pattern))
+
 /** Operations where swapping the numbers gives the same fact (7 × 8 = 8 × 7). */
 const ORDER_DOES_NOT_MATTER = new Set(['addition', 'multiplication'])
 
@@ -33,12 +49,13 @@ export function createMistakePattern(attempt: PracticeAttempt): MistakePattern {
     incorrectAnswers: [attempt.userAnswer],
     firstIncorrectAt: attempt.answeredAt,
     lastIncorrectAt: attempt.answeredAt,
+    masteredAt: null,
   }
 }
 
 /**
- * Adds another mistake to an existing pattern. Mastery progress goes back to 0, since the
- * player has just shown they don't know this fact yet.
+ * Adds another mistake to an existing pattern. Mastery progress goes back to 0, and a
+ * mastered pattern returns to review, since the player has just shown they don't know it yet.
  */
 export function updateMistakePattern(
   pattern: MistakePattern,
@@ -49,6 +66,7 @@ export function updateMistakePattern(
     difficulty: attempt.question.difficulty,
     incorrectCount: pattern.incorrectCount + 1,
     similarCorrectCount: 0,
+    masteredAt: null,
     incorrectAnswers: [...pattern.incorrectAnswers, attempt.userAnswer].slice(
       -MAX_SAVED_WRONG_ANSWERS,
     ),
@@ -74,6 +92,61 @@ export function recordMistake(
         pattern === existing ? updateMistakePattern(pattern, attempt) : pattern,
       )
     : [...patterns, createMistakePattern(attempt)]
+}
+
+/**
+ * A related review question answered correctly: one step closer to mastery. Reaching
+ * `threshold` marks the pattern as mastered.
+ */
+export function recordReviewSuccess(
+  pattern: MistakePattern,
+  answeredAt: string,
+  threshold: number,
+): MistakePattern {
+  const similarCorrectCount = pattern.similarCorrectCount + 1
+  const justMastered = !isMastered(pattern) && similarCorrectCount >= threshold
+  return {
+    ...pattern,
+    similarCorrectCount,
+    masteredAt: justMastered ? answeredAt : pattern.masteredAt,
+  }
+}
+
+/**
+ * A related review question answered incorrectly: counts as another mistake on the original
+ * fact. Progress resets and the pattern returns to review. The wrong answer isn't added to
+ * `incorrectAnswers`, since it was an answer to a different question.
+ */
+export function recordReviewMiss(pattern: MistakePattern, answeredAt: string): MistakePattern {
+  return {
+    ...pattern,
+    incorrectCount: pattern.incorrectCount + 1,
+    similarCorrectCount: 0,
+    masteredAt: null,
+    lastIncorrectAt: answeredAt > pattern.lastIncorrectAt ? answeredAt : pattern.lastIncorrectAt,
+  }
+}
+
+/**
+ * Updates the patterns for any attempt. A mistake-review question updates the pattern it was
+ * made from (right or wrong); any other wrong answer is recorded with `recordMistake`.
+ */
+export function applyAttempt(
+  patterns: MistakePattern[],
+  attempt: PracticeAttempt,
+  threshold: number,
+): MistakePattern[] {
+  const { source, mistakePatternId } = attempt.question
+  if (source === 'mistake-review' && mistakePatternId) {
+    const original = patterns.find((pattern) => pattern.key === mistakePatternId)
+    // If the pattern was deleted meanwhile, treat a miss like any other mistake.
+    if (!original) return recordMistake(patterns, attempt)
+    const updated = attempt.isCorrect
+      ? recordReviewSuccess(original, attempt.answeredAt, threshold)
+      : recordReviewMiss(original, attempt.answeredAt)
+    return patterns.map((pattern) => (pattern === original ? updated : pattern))
+  }
+  return recordMistake(patterns, attempt)
 }
 
 const isCount = (value: unknown): value is number =>
@@ -111,7 +184,8 @@ export function isMistakePattern(value: unknown): value is MistakePattern {
     Array.isArray(pattern.incorrectAnswers) &&
     pattern.incorrectAnswers.every((answer) => Number.isFinite(answer)) &&
     isDateString(pattern.firstIncorrectAt) &&
-    isDateString(pattern.lastIncorrectAt)
+    isDateString(pattern.lastIncorrectAt) &&
+    (pattern.masteredAt === null || isDateString(pattern.masteredAt))
   )
 }
 
@@ -119,7 +193,13 @@ export function isMistakePattern(value: unknown): value is MistakePattern {
 export function parseMistakePatterns(data: unknown): MistakePattern[] {
   if (!Array.isArray(data)) return []
   const byKey = new Map<string, MistakePattern>()
-  for (const pattern of data.filter(isMistakePattern)) {
+  // Patterns saved before mastery existed have no `masteredAt`: they still need review.
+  const withMastery = data.map((item) =>
+    typeof item === 'object' && item !== null && !('masteredAt' in item)
+      ? { ...item, masteredAt: null }
+      : item,
+  )
+  for (const pattern of withMastery.filter(isMistakePattern)) {
     const duplicate = byKey.get(pattern.key)
     byKey.set(pattern.key, duplicate ? mergePatterns(duplicate, pattern) : pattern)
   }

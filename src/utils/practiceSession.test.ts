@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 import { makeQuestion } from '../test/makeQuestion'
 import type { PracticeConfig, PracticeRound, PracticeSessionState } from '../types/session'
+import { makePattern } from '../test/makePattern'
 import {
+  createMistakeReviewRound,
   createNextRound,
   createReviewRound,
   getTotalQuestions,
@@ -213,5 +215,45 @@ describe('createNextRound', () => {
       expect(current.question.displayText).not.toBe(previous.question.displayText)
       previous = current
     }
+  })
+})
+
+describe('createMistakeReviewRound', () => {
+  const sevenEights = makePattern(7, 'multiplication', 8)
+  const nineFours = makePattern(9, 'subtraction', 4)
+  const order = [sevenEights.key, nineFours.key]
+
+  it('takes turns between patterns, mixing them in one session', () => {
+    const patternOf = (turn: number) =>
+      createMistakeReviewRound(order, [sevenEights, nineFours], turn, [])?.question.mistakePatternId
+
+    expect([0, 1, 2, 3].map(patternOf)).toEqual([order[0], order[1], order[0], order[1]])
+  })
+
+  it('makes related, labelled questions with answer choices', () => {
+    const round = createMistakeReviewRound(order, [sevenEights, nineFours], 0, [])!
+
+    expect(round.question.source).toBe('mistake-review')
+    expect(round.question.displayText).not.toBe('7 × 8')
+    expect(round.choices).toContain(round.question.correctAnswer)
+  })
+
+  it('skips patterns mastered since the session started', () => {
+    const mastered = { ...sevenEights, masteredAt: '2026-10-22T10:00:00.000Z' }
+
+    for (let turn = 0; turn < 4; turn++) {
+      expect(
+        createMistakeReviewRound(order, [mastered, nineFours], turn, [])?.question.mistakePatternId,
+      ).toBe(nineFours.key)
+    }
+  })
+
+  it('returns null when every pattern is mastered', () => {
+    const allMastered = [sevenEights, nineFours].map((p) => ({
+      ...p,
+      masteredAt: '2026-10-22T10:00:00.000Z',
+    }))
+
+    expect(createMistakeReviewRound(order, allMastered, 0, [])).toBeNull()
   })
 })

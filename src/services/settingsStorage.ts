@@ -2,6 +2,7 @@ import { DEFAULT_SETTINGS } from '../data/defaultSettings'
 import { migrateStorage } from './schema'
 import { readJson, STORAGE_PREFIX, writeJson } from './storage'
 import type { AppSettings } from '../types/settings'
+import { isMasteryThreshold } from '../utils/mistakePatterns'
 import { isPracticeConfig } from '../utils/practiceConfig'
 
 const SETTINGS_KEY = 'settings'
@@ -38,6 +39,9 @@ export function parseSettings(saved: unknown): AppSettings {
     showTimer: boolean('showTimer'),
     soundEnabled: boolean('soundEnabled'),
     showExplanations: boolean('showExplanations'),
+    masteryThreshold: isMasteryThreshold(data.masteryThreshold)
+      ? data.masteryThreshold
+      : DEFAULT_SETTINGS.masteryThreshold,
     animationsEnabled: boolean('animationsEnabled'),
   }
 }

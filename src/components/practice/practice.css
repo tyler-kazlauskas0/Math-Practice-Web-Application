@@ -73,6 +73,24 @@
 }
 
 /* The native input stays in the page for keyboard and screen-reader use, but is invisible. */
+.choice-card--disabled {
+  border-style: dashed;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.choice-card--disabled:hover {
+  border-color: var(--color-border);
+}
+
+.choice-card--disabled .choice-card__label {
+  color: var(--color-text-muted);
+}
+
+.choice-card--disabled .choice-card__input {
+  cursor: not-allowed;
+}
+
 .choice-card__input {
   position: absolute;
   inset: 0;
@@ -185,4 +203,12 @@
   border-radius: var(--radius);
   background: var(--color-primary-light);
   font-weight: 700;
+}
+
+.setup-review-note {
+  margin: 0;
+  padding: var(--space-3);
+  border-left: 6px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-primary-light);
 }

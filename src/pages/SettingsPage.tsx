@@ -5,6 +5,7 @@ import DifficultySelector from '../components/practice/DifficultySelector'
 import OperationSelector from '../components/practice/OperationSelector'
 import '../components/practice/practice.css'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
+import ChoiceCard from '../components/practice/ChoiceCard'
 import ClearAllData from '../components/settings/ClearAllData'
 import SettingToggle from '../components/settings/SettingToggle'
 import { DATA_CLEARED_REASON, ROUTES } from '../data/routes'
@@ -12,6 +13,7 @@ import { useMistakePatterns } from '../hooks/useMistakePatterns'
 import { useSettings } from '../hooks/useSettings'
 import { clearAllAppData } from '../services/storage'
 import type { MathOperation } from '../types/question'
+import { MASTERY_THRESHOLD_OPTIONS } from '../utils/mistakePatterns'
 import './SettingsPage.css'
 
 function SettingsPage() {
@@ -94,6 +96,30 @@ function SettingsPage() {
             value={settings.sessionLength}
             onChange={(sessionLength) => save({ sessionLength })}
           />
+        </section>
+
+        <section className="settings-section" aria-labelledby="review-heading">
+          <h2 id="review-heading">Mistake review</h2>
+          <fieldset className="setup-group">
+            <legend className="setup-group__legend">Correct answers to master a mistake</legend>
+            <p className="setup-group__hint">
+              A mistake is mastered after this many related questions are answered right in a row.
+              Mastered mistakes leave mistake review until they’re missed again.
+            </p>
+            <div className="choice-grid choice-grid--four">
+              {MASTERY_THRESHOLD_OPTIONS.map((count) => (
+                <ChoiceCard
+                  key={count}
+                  type="radio"
+                  name="mastery-threshold"
+                  value={String(count)}
+                  checked={settings.masteryThreshold === count}
+                  onChange={() => save({ masteryThreshold: count })}
+                  label={`${count} in a row`}
+                />
+              ))}
+            </div>
+          </fieldset>
         </section>
 
         <section className="settings-section" aria-labelledby="data-heading">

@@ -12,6 +12,8 @@ export interface AppSettings {
   soundEnabled: boolean
   /** Show a short explanation of the answer on the back of the question card. */
   showExplanations: boolean
+  /** Related questions answered correctly in a row needed to master a mistake (2–5). */
+  masteryThreshold: number
   /** Animate the question card when it flips. Animations are also skipped if the device asks for reduced motion. */
   animationsEnabled: boolean
 }

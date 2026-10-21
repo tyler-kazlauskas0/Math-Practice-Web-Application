@@ -1,3 +1,4 @@
+import type { MistakePattern } from '../types/mistake'
 import type { Question } from '../types/question'
 import type {
   PracticeAttempt,
@@ -8,6 +9,9 @@ import type {
 import { createId } from './id'
 import { createAnswerChoices } from './questions/answerChoices'
 import { generatePracticeQuestion } from './questions/generateQuestion'
+import { activePatterns } from './mistakePatterns'
+import type { RandomSource } from './random'
+import { generateSimilarQuestion } from './questions/similarQuestions'
 import { isValidQuestion } from './questions/validateQuestion'
 
 /** How many times to try for a question that differs from the previous one. */
@@ -48,6 +52,36 @@ export function createReviewRound(question: Question): PracticeRound {
   return { question: reviewQuestion, choices: createAnswerChoices(reviewQuestion) }
 }
 
+/**
+ * The next mistake-review question. Patterns take turns in `order` (so one session mixes
+ * several mistakes), skipping any that have been mastered since the session started. Each
+ * turn asks a question related to the pattern, avoiding `recentQuestions`. Returns `null`
+ * when no pattern still needs review or none can produce a question.
+ */
+export function createMistakeReviewRound(
+  order: string[],
+  patterns: MistakePattern[],
+  turn: number,
+  recentQuestions: string[],
+  random?: RandomSource,
+): PracticeRound | null {
+  const active = new Map(activePatterns(patterns).map((pattern) => [pattern.key, pattern]))
+  const rotation = order.filter((key) => active.has(key))
+
+  for (let i = 0; i < rotation.length; i++) {
+    const pattern = active.get(rotation[(turn + i) % rotation.length])!
+    const similar = generateSimilarQuestion(pattern, { recentQuestions, random })
+    if (similar) {
+      return { question: similar.question, choices: createAnswerChoices(similar.question) }
+    }
+  }
+  return null
+}
+
+/** Whether a session is any kind of mistake review. */
+export const isReviewSession = (state: PracticeSessionState) =>
+  state.reviewQuestions !== null || state.reviewPatternOrder !== null
+
 /** Keeps only valid questions, e.g. from navigation state that can't be trusted. */
 export function validReviewQuestions(value: unknown): Question[] {
   return Array.isArray(value) ? value.filter(isValidQuestion) : []
@@ -70,12 +104,16 @@ export function isSessionComplete(state: PracticeSessionState): boolean {
   return total !== null && state.attempts.length >= total
 }
 
-/** Starts a new session with its first question. Pass `reviewQuestions` for a mistake review. */
+/**
+ * Starts a new session with its first question. Pass `reviewQuestions` to re-ask exact
+ * questions, or `reviewPatternOrder` for a mistake-review session.
+ */
 export function startSession(
   config: PracticeConfig,
   round: PracticeRound | null,
   now: number,
   reviewQuestions: Question[] | null = null,
+  reviewPatternOrder: string[] | null = null,
 ): PracticeSessionState {
   return {
     id: createId(),
@@ -90,6 +128,7 @@ export function startSession(
     incorrectCount: 0,
     isActive: round !== null,
     reviewQuestions,
+    reviewPatternOrder,
   }
 }
 

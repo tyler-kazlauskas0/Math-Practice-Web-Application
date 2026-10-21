@@ -1,5 +1,6 @@
 import type { PracticeAttempt, PracticeConfig, PracticeSessionState } from '../types/session'
 import { isPracticeConfig } from '../utils/practiceConfig'
+import { isReviewSession } from '../utils/practiceSession'
 import { isValidQuestion } from '../utils/questions/validateQuestion'
 import type { ArchivedTotals, Tally } from '../utils/statistics'
 import { difficultyKeys, emptyTallies, operationKeys } from './migrations'
@@ -156,7 +157,7 @@ export function toStoredSession(state: PracticeSessionState): StoredSession {
   return {
     id: state.id,
     config: state.config,
-    isReview: state.reviewQuestions !== null,
+    isReview: isReviewSession(state),
     startedAt: state.startedAt,
     completedAt: state.completedAt,
     totalAttempts: state.attempts.length,

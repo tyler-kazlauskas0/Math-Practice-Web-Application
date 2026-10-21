@@ -11,6 +11,8 @@ interface ChoiceCardProps {
   description?: string
   /** A large symbol shown above the label, e.g. `+`. */
   icon?: ReactNode
+  /** Can't be chosen. Use `description` to say why. */
+  disabled?: boolean
 }
 
 /**
@@ -26,12 +28,17 @@ function ChoiceCard({
   label,
   description,
   icon,
+  disabled = false,
 }: ChoiceCardProps) {
   const labelId = `${name}-${value}-label`
   const descriptionId = description ? `${name}-${value}-description` : undefined
 
   return (
-    <label className={`choice-card${checked ? ' choice-card--selected' : ''}`}>
+    <label
+      className={`choice-card${checked ? ' choice-card--selected' : ''}${
+        disabled ? ' choice-card--disabled' : ''
+      }`}
+    >
       <input
         className="choice-card__input"
         type={type}
@@ -39,6 +46,7 @@ function ChoiceCard({
         value={value}
         checked={checked}
         onChange={onChange}
+        disabled={disabled}
         // Name the input by its label only, so the description isn't read as part of it.
         aria-labelledby={labelId}
         aria-describedby={descriptionId}

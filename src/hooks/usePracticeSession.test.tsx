@@ -2,10 +2,18 @@ import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import type { PracticeConfig } from '../types/session'
 import * as practiceSession from '../utils/practiceSession'
+import type { ReactNode } from 'react'
 import MistakePatternsProvider from '../components/MistakePatternsProvider'
+import SettingsProvider from '../components/SettingsProvider'
 import { usePracticeSession } from './usePracticeSession'
 
 vi.mock('../utils/practiceSession', { spy: true })
+
+const Providers = ({ children }: { children: ReactNode }) => (
+  <SettingsProvider>
+    <MistakePatternsProvider>{children}</MistakePatternsProvider>
+  </SettingsProvider>
+)
 
 const config: PracticeConfig = { operations: ['addition'], difficulty: 'easy', sessionLength: 5 }
 const result = { selectedAnswer: 1, markedCorrect: true, timeTakenMs: 1000 }
@@ -13,7 +21,7 @@ const result = { selectedAnswer: 1, markedCorrect: true, timeTakenMs: 1000 }
 describe('usePracticeSession', () => {
   it('stops generating questions once the session is complete', () => {
     const { result: hook } = renderHook(() => usePracticeSession(config), {
-      wrapper: MistakePatternsProvider,
+      wrapper: Providers,
     })
 
     for (let i = 0; i < 5; i++) {

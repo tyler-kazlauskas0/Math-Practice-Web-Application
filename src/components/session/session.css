@@ -137,3 +137,21 @@
   color: var(--color-text-muted);
   text-align: center;
 }
+
+.summary-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.summary-review h2 {
+  margin: 0;
+}
+
+.summary-review__celebrate {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  text-align: center;
+}
