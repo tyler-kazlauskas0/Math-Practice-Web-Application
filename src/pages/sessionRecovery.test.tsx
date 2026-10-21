@@ -7,6 +7,7 @@ import { ROUTES } from '../data/routes'
 import { appRoutes } from '../routes'
 import { loadActiveSession } from '../services/activeSession'
 import { loadRecentSessions } from '../services/practiceHistory'
+import { answerValue } from '../test/practice'
 
 type User = ReturnType<typeof userEvent.setup>
 
@@ -37,7 +38,7 @@ describe('restoring a session after a refresh', () => {
     await answer(first.user)
     await first.user.keyboard('3')
     const shown = question()
-    const chosen = screen.getAllByRole('button', { name: /^Answer / })[2].getAttribute('aria-label')
+    const chosen = `Answer ${answerValue(screen.getAllByRole('button', { name: /^Answer / })[2])}`
     first.unmount()
 
     open([{ pathname: ROUTES.practiceSession, state: config, key: 'tab-1' }])

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_SETTINGS } from '../data/defaultSettings'
 import { makePattern } from '../test/makePattern'
 import { makeQuestion } from '../test/makeQuestion'
@@ -42,6 +42,8 @@ function saveGoodData() {
 const snapshot = () => Object.fromEntries(Object.entries(localStorage))
 
 describe('checkAndRepairStoredData', () => {
+  // Repairs are logged for developers; keep that out of the test output.
+  beforeEach(() => vi.spyOn(console, 'error').mockImplementation(() => {}))
   afterEach(() => vi.restoreAllMocks())
 
   it('leaves good data alone and reports nothing', () => {

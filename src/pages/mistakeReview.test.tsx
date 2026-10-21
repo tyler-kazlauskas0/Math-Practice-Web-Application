@@ -9,9 +9,8 @@ import { loadMistakePatterns, saveMistakePatterns } from '../services/mistakePat
 import { loadAttempts } from '../services/practiceHistory'
 import { loadSettings } from '../services/settingsStorage'
 import { makePattern } from '../test/makePattern'
+import { answerQuestion } from '../test/practice'
 import type { MistakePattern } from '../types/mistake'
-
-type User = ReturnType<typeof userEvent.setup>
 
 function startApp(path: string, state?: unknown) {
   const user = userEvent.setup()
@@ -24,25 +23,6 @@ function startApp(path: string, state?: unknown) {
 const sevenEights = makePattern(7, 'multiplication', 8)
 const nineFours = makePattern(9, 'subtraction', 4)
 const modeGroup = () => within(screen.getByRole('group', { name: 'What kind of practice?' }))
-
-/** Picks the correct answer (or a wrong one), flips, marks it honestly, and moves on. */
-async function answerHonestly(user: User, getItRight: boolean) {
-  const heading = screen.getByRole('heading', { level: 2 }).textContent!
-  const [left, symbol, right] = heading.replace(' = ?', '').split(' ')
-  const a = Number(left)
-  const b = Number(right)
-  const correct = { '+': a + b, '−': a - b, '×': a * b, '÷': a / b }[symbol]!
-  const choices = screen.getAllByRole('button', { name: /^Answer / })
-  const valueOf = (choice: HTMLElement) =>
-    Number(choice.getAttribute('aria-label')!.replace('Answer ', ''))
-  const pick = choices.find((c) => (valueOf(c) === correct) === getItRight)!
-  await user.click(pick)
-  await user.click(screen.getByRole('button', { name: 'Flip Card' }))
-  await user.click(
-    screen.getByRole('button', { name: getItRight ? 'I Got It Right' : 'I Got It Wrong' }),
-  )
-  await user.click(screen.getByRole('button', { name: /^(Next Question|Finish)$/ }))
-}
 
 describe('practice setup modes', () => {
   it('offers regular practice and mistake review, with the number of mistakes', () => {
@@ -91,8 +71,8 @@ describe('mistake review sessions', () => {
     const { user } = await startReview([sevenEights, nineFours])
     expect(screen.getByRole('heading', { level: 1, name: 'Mistake Review' })).toBeInTheDocument()
 
-    await answerHonestly(user, true)
-    await answerHonestly(user, true)
+    await answerQuestion(user, true)
+    await answerQuestion(user, true)
 
     const attempts = loadAttempts()
     expect(attempts.map((a) => a.question.source)).toEqual(['mistake-review', 'mistake-review'])
@@ -108,7 +88,7 @@ describe('mistake review sessions', () => {
   it('counts correct review answers toward mastery and saves the pattern', async () => {
     const { user } = await startReview([sevenEights])
 
-    await answerHonestly(user, true)
+    await answerQuestion(user, true)
 
     expect(loadMistakePatterns()[0]).toMatchObject({ similarCorrectCount: 1, masteredAt: null })
   })
@@ -116,7 +96,7 @@ describe('mistake review sessions', () => {
   it('resets progress and counts a mistake on the original after a wrong review answer', async () => {
     const { user } = await startReview([{ ...sevenEights, similarCorrectCount: 2 }])
 
-    await answerHonestly(user, false)
+    await answerQuestion(user, false)
 
     expect(loadMistakePatterns()).toEqual([
       expect.objectContaining({ key: sevenEights.key, incorrectCount: 2, similarCorrectCount: 0 }),
@@ -126,7 +106,7 @@ describe('mistake review sessions', () => {
   it('masters mistakes after three correct answers, ends when all are mastered, and shows counts', async () => {
     const { user } = await startReview([sevenEights, nineFours])
 
-    for (let i = 0; i < 6; i++) await answerHonestly(user, true)
+    for (let i = 0; i < 6; i++) await answerQuestion(user, true)
 
     expect(loadMistakePatterns().every((p) => p.masteredAt !== null)).toBe(true)
     expect(
@@ -144,7 +124,7 @@ describe('mistake review sessions', () => {
     const mastered = { ...sevenEights, masteredAt: '2026-10-22T10:00:00.000Z' }
     const { user } = await startReview([mastered, nineFours], '5 questions')
 
-    for (let i = 0; i < 2; i++) await answerHonestly(user, true)
+    for (let i = 0; i < 2; i++) await answerQuestion(user, true)
 
     expect(loadAttempts().every((a) => a.question.mistakePatternId === nineFours.key)).toBe(true)
   })
@@ -178,8 +158,8 @@ describe('mastery threshold setting', () => {
       await result.user.click(screen.getByRole('button', { name: 'Start Session' }))
       return result
     })()
-    await answerHonestly(user, true)
-    await answerHonestly(user, true)
+    await answerQuestion(user, true)
+    await answerQuestion(user, true)
 
     expect(loadMistakePatterns()[0].masteredAt).not.toBeNull()
   })

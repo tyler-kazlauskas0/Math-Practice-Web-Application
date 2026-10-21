@@ -65,7 +65,8 @@
   }
 }
 
-/* A short fade-in for each new question. Not used without animation. */
+/* A short fade-in for each new question. Not used without animation. It rises from just
+   below rather than sliding in from the side, which would make narrow screens scroll sideways. */
 .question-card--enter {
   animation: question-card-enter 0.25s ease-out;
 }
@@ -73,7 +74,7 @@
 @keyframes question-card-enter {
   from {
     opacity: 0;
-    transform: translateX(1.5rem);
+    transform: translateY(0.75rem);
   }
 }
 

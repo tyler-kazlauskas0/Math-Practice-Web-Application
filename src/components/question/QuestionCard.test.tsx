@@ -37,11 +37,10 @@ describe('QuestionCard front', () => {
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('7 × 8 = ?')
     expect(screen.getByText('Question 3 of 10')).toBeInTheDocument()
     const group = screen.getByRole('group', { name: 'Answer choices' })
-    expect(
-      within(group)
-        .getAllByRole('button')
-        .map((button) => button.getAttribute('aria-label')),
-    ).toEqual(['Answer 54', 'Answer 56', 'Answer 63', 'Answer 48'])
+    const buttons = within(group).getAllByRole('button')
+    ;[54, 56, 63, 48].forEach((value, index) => {
+      expect(buttons[index]).toHaveAccessibleName(`Answer ${value}`)
+    })
   })
 
   it('shows only the question number in non-stop practice', () => {
