@@ -1,5 +1,7 @@
 import { useLocation } from 'react-router'
 import PageContainer from '../components/layout/PageContainer'
+import ResumeSessionBanner from '../components/session/ResumeSessionBanner'
+import '../components/session/session.css'
 import ButtonLink from '../components/ui/ButtonLink'
 import { DATA_CLEARED_REASON, ROUTES } from '../data/routes'
 import './HomePage.css'
@@ -11,6 +13,7 @@ function HomePage() {
   return (
     <PageContainer>
       <section className="home">
+        <ResumeSessionBanner />
         {dataCleared && (
           <p className="home__notice" role="status">
             All app data was deleted. Everything is back to the way it started.

@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from './App'
+import { appRoutes } from './routes'
 import { ROUTES } from './data/routes'
 import { saveMistakePatterns } from './services/mistakePatterns'
 import { saveAttempt, saveSession } from './services/practiceHistory'
@@ -13,9 +14,7 @@ import { makeQuestion } from './test/makeQuestion'
 function renderAt(path: string, state?: unknown) {
   const user = userEvent.setup()
   render(
-    <MemoryRouter initialEntries={[{ pathname: path, state }]}>
-      <App />
-    </MemoryRouter>,
+    <App router={createMemoryRouter(appRoutes, { initialEntries: [{ pathname: path, state }] })} />,
   )
   return user
 }
@@ -83,6 +82,17 @@ describe('automated accessibility checks (axe)', () => {
       )
       await user.click(screen.getByRole('button', { name: /^(Next Question|Finish)$/ }))
     }
+
+    expect(await findAccessibilityViolations()).toEqual([])
+  })
+
+  it('finds no problems in the leave-session warning', async () => {
+    const user = renderAt(ROUTES.practiceSession, session)
+    await user.keyboard('1')
+    await user.click(screen.getByRole('button', { name: 'Flip Card' }))
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
+    await user.click(screen.getByRole('link', { name: 'Statistics' }))
+    expect(screen.getByRole('alertdialog', { name: /leave/i })).toBeInTheDocument()
 
     expect(await findAccessibilityViolations()).toEqual([])
   })

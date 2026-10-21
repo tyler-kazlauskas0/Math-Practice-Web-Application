@@ -1,23 +1,24 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 
 function renderSession(sessionLength: 5 | 'continuous' = 5) {
   const user = userEvent.setup()
   const view = render(
-    <MemoryRouter
-      initialEntries={[
-        {
-          pathname: ROUTES.practiceSession,
-          state: { operations: ['addition'], difficulty: 'easy', sessionLength },
-        },
-      ]}
-    >
-      <App />
-    </MemoryRouter>,
+    <App
+      router={createMemoryRouter(appRoutes, {
+        initialEntries: [
+          {
+            pathname: ROUTES.practiceSession,
+            state: { operations: ['addition'], difficulty: 'easy', sessionLength },
+          },
+        ],
+      })}
+    />,
   )
   return { user, ...view }
 }

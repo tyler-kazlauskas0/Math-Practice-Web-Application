@@ -6,6 +6,8 @@ import OperationSelector from '../components/practice/OperationSelector'
 import PracticeModeSelector from '../components/practice/PracticeModeSelector'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
 import '../components/practice/practice.css'
+import ResumeSessionBanner from '../components/session/ResumeSessionBanner'
+import '../components/session/session.css'
 import Button from '../components/ui/Button'
 import { MISSING_SESSION_REASON, ROUTES } from '../data/routes'
 import { useMistakePatterns } from '../hooks/useMistakePatterns'
@@ -52,6 +54,7 @@ function PracticeSetupPage() {
 
   return (
     <PageContainer title="Practice Setup">
+      <ResumeSessionBanner />
       {cameFromMissingSession && (
         <p className="setup-notice" role="status">
           Choose what you want to practice, then press Start Session.

@@ -5,6 +5,12 @@ import QuestionCardBack from './QuestionCardBack'
 import QuestionCardFront from './QuestionCardFront'
 import './question.css'
 
+/** What the card is showing, so it can be saved and restored after a page refresh. */
+export interface QuestionCardState {
+  selectedAnswer: number | null
+  isCardFlipped: boolean
+}
+
 export interface QuestionCardResult {
   selectedAnswer: number
   markedCorrect: boolean
@@ -31,6 +37,10 @@ interface QuestionCardProps {
   onNext: () => void
   /** Picks an encouraging message after marking, or returns `null` for none (feedback turned off). */
   getFeedback?: (markedCorrect: boolean) => string | null
+  /** Where the card starts, e.g. restored after a refresh. Defaults to a fresh card. */
+  initialState?: QuestionCardState & { markedCorrect: boolean | null; timeTakenMs?: number }
+  /** Called whenever the selected answer or flip changes. */
+  onStateChange?: (state: QuestionCardState) => void
 }
 
 /**
@@ -51,11 +61,17 @@ function QuestionCard({
   onResult,
   onNext,
   getFeedback,
+  initialState,
+  onStateChange,
 }: QuestionCardProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [isCardFlipped, setIsCardFlipped] = useState(false)
-  const [markedCorrect, setMarkedCorrect] = useState<boolean | null>(null)
-  const [timeTakenMs, setTimeTakenMs] = useState(0)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(
+    initialState?.selectedAnswer ?? null,
+  )
+  const [isCardFlipped, setIsCardFlipped] = useState(initialState?.isCardFlipped ?? false)
+  const [markedCorrect, setMarkedCorrect] = useState<boolean | null>(
+    initialState?.markedCorrect ?? null,
+  )
+  const [timeTakenMs, setTimeTakenMs] = useState(initialState?.timeTakenMs ?? 0)
   const [feedback, setFeedback] = useState<string | null>(null)
   const shownAtRef = useRef(0)
 
@@ -66,6 +82,10 @@ function QuestionCard({
   useEffect(() => {
     shownAtRef.current = Date.now()
   }, [])
+
+  useEffect(() => {
+    onStateChange?.({ selectedAnswer, isCardFlipped })
+  }, [selectedAnswer, isCardFlipped, onStateChange])
 
   useEffect(() => {
     if (autoFocus) frontHeadingRef.current?.focus()

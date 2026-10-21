@@ -41,7 +41,8 @@ src/
   types/       Shared TypeScript types
   utils/       Helper functions (random numbers, IDs, session logic, mistake priority)
     questions/ Math question generation, validation, and questions similar to past mistakes
-  App.tsx      Root component and route definitions
+  App.tsx      Root component (settings, mistakes, and the router)
+  routes.tsx   Every page's address (a React Router data router, needed for leave warnings)
   main.tsx     Entry point
 ```
 
@@ -58,6 +59,7 @@ Nothing is sent to a server.
 | `math-practice:attempts`         | Every answer from those sessions, up to 5,000                                 |
 | `math-practice:history-archive`  | Totals (overall, per operation, per level) for answers no longer kept in full |
 | `math-practice:mistake-patterns` | One record per math fact answered wrong (up to 500), for mistake practice     |
+| `math-practice:active-session`   | The session in progress (question, chosen answer), so a refresh can resume it |
 
 When the format changes, increase `CURRENT_SCHEMA_VERSION` and add a migration to `MIGRATIONS`.
 

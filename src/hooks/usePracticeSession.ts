@@ -63,6 +63,8 @@ export interface PracticeSessionOptions {
   reviewQuestions?: Question[] | null
   /** Ask questions related to the player's saved mistakes. */
   mistakeReview?: boolean
+  /** Continue this saved session (e.g. after a page refresh) instead of starting a new one. */
+  restored?: PracticeSessionState | null
 }
 
 /**
@@ -71,11 +73,12 @@ export interface PracticeSessionOptions {
  */
 export function usePracticeSession(
   config: PracticeConfig,
-  { reviewQuestions = null, mistakeReview = false }: PracticeSessionOptions = {},
+  { reviewQuestions = null, mistakeReview = false, restored = null }: PracticeSessionOptions = {},
 ) {
   const { patterns, recordAttempt } = useMistakePatterns()
   const { masteryThreshold } = useSettings().settings
   const [state, dispatch] = useReducer(practiceSessionReducer, null, () => {
+    if (restored) return restored
     const now = Date.now()
     if (mistakeReview) {
       const order = prioritizePatterns(patterns, { now, threshold: masteryThreshold }).map(

@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { ROUTES } from '../data/routes'
 import { SETTINGS_STORAGE_KEY } from '../services/settingsStorage'
 import { POSITIVE_FEEDBACK, SUPPORTIVE_FEEDBACK } from '../utils/feedback'
@@ -10,16 +11,16 @@ import { POSITIVE_FEEDBACK, SUPPORTIVE_FEEDBACK } from '../utils/feedback'
 function renderSession() {
   const user = userEvent.setup()
   const view = render(
-    <MemoryRouter
-      initialEntries={[
-        {
-          pathname: ROUTES.practiceSession,
-          state: { operations: ['addition'], difficulty: 'easy', sessionLength: 5 },
-        },
-      ]}
-    >
-      <App />
-    </MemoryRouter>,
+    <App
+      router={createMemoryRouter(appRoutes, {
+        initialEntries: [
+          {
+            pathname: ROUTES.practiceSession,
+            state: { operations: ['addition'], difficulty: 'easy', sessionLength: 5 },
+          },
+        ],
+      })}
+    />,
   )
   return { user, ...view }
 }
@@ -77,11 +78,7 @@ describe('encouraging feedback', () => {
 
   it('has a Settings toggle', async () => {
     const user = userEvent.setup()
-    render(
-      <MemoryRouter initialEntries={[ROUTES.settings]}>
-        <App />
-      </MemoryRouter>,
-    )
+    render(<App router={createMemoryRouter(appRoutes, { initialEntries: [ROUTES.settings] })} />)
     const toggle = screen.getByRole('checkbox', { name: 'Encouraging messages' })
     expect(toggle).toBeChecked()
 

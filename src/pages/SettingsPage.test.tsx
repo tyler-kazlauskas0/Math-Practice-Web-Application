@@ -1,19 +1,16 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router'
+import { createMemoryRouter } from 'react-router'
 import { describe, expect, it } from 'vitest'
 import App from '../App'
+import { appRoutes } from '../routes'
 import { DEFAULT_SETTINGS } from '../data/defaultSettings'
 import { ROUTES } from '../data/routes'
 import { loadSettings, SETTINGS_STORAGE_KEY } from '../services/settingsStorage'
 
 function renderApp(path: string = ROUTES.settings) {
   const user = userEvent.setup()
-  const view = render(
-    <MemoryRouter initialEntries={[path]}>
-      <App />
-    </MemoryRouter>,
-  )
+  const view = render(<App router={createMemoryRouter(appRoutes, { initialEntries: [path] })} />)
   return { user, ...view }
 }
 
