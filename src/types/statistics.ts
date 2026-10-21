@@ -1,4 +1,4 @@
-import type { DifficultyLevel, MathOperation } from './question'
+import type { DifficultyLevel, MathOperation, Question } from './question'
 import type { PracticeConfig } from './session'
 
 /** Totals shared by every statistics breakdown. */
@@ -37,6 +37,10 @@ export interface SessionSummary extends AttemptStatistics {
   incorrectAttempts: number
   /** Only the operations that were actually asked, in the usual order. */
   byOperation: OperationStatistics[]
+  /** Questions marked wrong, once each, for the Practice Mistakes button. */
+  mistakes: Question[]
+  /** `true` if this was a mistake-review session. */
+  isReview: boolean
   startedAt: string
   completedAt: string
 }

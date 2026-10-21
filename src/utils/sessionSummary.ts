@@ -1,5 +1,7 @@
 import { OPERATION_OPTIONS } from '../data/practiceOptions'
+import type { Question } from '../types/question'
 import type { PracticeAttempt, PracticeSession } from '../types/session'
+import { isPracticeConfig } from './practiceConfig'
 import type { AttemptStatistics, SessionSummary } from '../types/statistics'
 
 function summarizeAttempts(attempts: PracticeAttempt[]): AttemptStatistics {
@@ -15,8 +17,24 @@ function summarizeAttempts(attempts: PracticeAttempt[]): AttemptStatistics {
   }
 }
 
+/** The questions marked wrong, once each, in the order they were asked. */
+export function collectMistakes(attempts: PracticeAttempt[]): Question[] {
+  const seen = new Set<string>()
+  return attempts
+    .filter((attempt) => !attempt.isCorrect)
+    .map((attempt) => attempt.question)
+    .filter((question) => {
+      if (seen.has(question.displayText)) return false
+      seen.add(question.displayText)
+      return true
+    })
+}
+
 /** Builds the summary shown when a session ends. */
-export function createSessionSummary(session: PracticeSession): SessionSummary {
+export function createSessionSummary(
+  session: PracticeSession,
+  { isReview = false }: { isReview?: boolean } = {},
+): SessionSummary {
   const overall = summarizeAttempts(session.attempts)
   const byOperation = OPERATION_OPTIONS.map(({ value: operation }) => ({
     operation,
@@ -29,6 +47,8 @@ export function createSessionSummary(session: PracticeSession): SessionSummary {
     config: session.config,
     incorrectAttempts: overall.totalAttempts - overall.correctAttempts,
     byOperation,
+    mistakes: collectMistakes(session.attempts),
+    isReview,
     startedAt: session.startedAt,
     completedAt: session.completedAt ?? new Date().toISOString(),
   }
@@ -44,6 +64,8 @@ export function isSessionSummary(value: unknown): value is SessionSummary {
     typeof summary.correctAttempts === 'number' &&
     typeof summary.incorrectAttempts === 'number' &&
     typeof summary.accuracy === 'number' &&
-    Array.isArray(summary.byOperation)
+    Array.isArray(summary.byOperation) &&
+    Array.isArray(summary.mistakes) &&
+    isPracticeConfig(summary.config)
   )
 }

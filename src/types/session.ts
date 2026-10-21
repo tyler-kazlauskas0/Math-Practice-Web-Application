@@ -54,4 +54,17 @@ export interface PracticeSessionState extends PracticeSession {
   incorrectCount: number
   /** `false` once the session has ended. */
   isActive: boolean
+  /**
+   * For a mistake-review session, the questions to ask again, in order. The session ends
+   * after the last one. `null` for a normal session.
+   */
+  reviewQuestions: Question[] | null
+}
+
+/**
+ * What the practice page receives when a session starts: the setup choices, plus the
+ * questions to ask again when it is a mistake-review session.
+ */
+export interface PracticeSessionRequest extends PracticeConfig {
+  reviewQuestions?: Question[]
 }

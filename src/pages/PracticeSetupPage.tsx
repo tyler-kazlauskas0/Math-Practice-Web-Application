@@ -9,13 +9,17 @@ import Button from '../components/ui/Button'
 import { DEFAULT_PRACTICE_CONFIG } from '../data/practiceOptions'
 import { MISSING_SESSION_REASON, ROUTES } from '../data/routes'
 import type { PracticeConfig } from '../types/session'
+import { isPracticeConfig } from '../utils/practiceConfig'
 
 function PracticeSetupPage() {
   const navigate = useNavigate()
   const { state } = useLocation()
-  const cameFromMissingSession =
-    (state as { reason?: unknown } | null)?.reason === MISSING_SESSION_REASON
-  const [config, setConfig] = useState<PracticeConfig>(DEFAULT_PRACTICE_CONFIG)
+  const navigationState = state as { reason?: unknown; config?: unknown } | null
+  const cameFromMissingSession = navigationState?.reason === MISSING_SESSION_REASON
+  // Start from the previous session's choices when coming from the summary's Change Settings.
+  const [config, setConfig] = useState<PracticeConfig>(() =>
+    isPracticeConfig(navigationState?.config) ? navigationState.config : DEFAULT_PRACTICE_CONFIG,
+  )
   const hasOperations = config.operations.length > 0
 
   return (
