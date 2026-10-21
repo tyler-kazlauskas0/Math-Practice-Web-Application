@@ -45,6 +45,7 @@ const summary: SessionSummary = {
   ],
   mistakes: [makeQuestion(56, 'division', 7), makeQuestion(27, 'addition', 15)],
   isReview: false,
+  mistakeReview: null,
   startedAt: '2026-10-21T10:00:00.000Z',
   completedAt: '2026-10-21T10:05:00.000Z',
 }

@@ -3,17 +3,37 @@ import { useLocation, useNavigate } from 'react-router'
 import PageContainer from '../components/layout/PageContainer'
 import DifficultySelector from '../components/practice/DifficultySelector'
 import OperationSelector from '../components/practice/OperationSelector'
+import PracticeModeSelector from '../components/practice/PracticeModeSelector'
 import SessionLengthSelector from '../components/practice/SessionLengthSelector'
 import '../components/practice/practice.css'
 import Button from '../components/ui/Button'
 import { MISSING_SESSION_REASON, ROUTES } from '../data/routes'
+import { useMistakePatterns } from '../hooks/useMistakePatterns'
 import { useSettings } from '../hooks/useSettings'
-import type { PracticeConfig } from '../types/session'
+import type { MistakePattern } from '../types/mistake'
+import type { DifficultyLevel, MathOperation } from '../types/question'
+import type { PracticeConfig, PracticeMode, PracticeSessionRequest } from '../types/session'
+import { activePatterns } from '../utils/mistakePatterns'
 import { isPracticeConfig } from '../utils/practiceConfig'
+
+/**
+ * The setup choices recorded for a mistake review: the operations being reviewed and the
+ * most common difficulty among them (each question still uses its own mistake's level).
+ */
+function reviewConfig(patterns: MistakePattern[], sessionLength: PracticeConfig['sessionLength']) {
+  const operations = [...new Set(patterns.map((pattern) => pattern.operation))] as MathOperation[]
+  const counts = new Map<DifficultyLevel, number>()
+  patterns.forEach((p) => counts.set(p.difficulty, (counts.get(p.difficulty) ?? 0) + 1))
+  const difficulty = [...counts].sort((a, b) => b[1] - a[1])[0][0]
+  return { operations, difficulty, sessionLength }
+}
 
 function PracticeSetupPage() {
   const navigate = useNavigate()
   const { settings } = useSettings()
+  const active = activePatterns(useMistakePatterns().patterns)
+  const [mode, setMode] = useState<PracticeMode>('practice')
+  const isMistakeReview = mode === 'mistake-review' && active.length > 0
   const { state } = useLocation()
   const navigationState = state as { reason?: unknown; config?: unknown } | null
   const cameFromMissingSession = navigationState?.reason === MISSING_SESSION_REASON
@@ -28,7 +48,7 @@ function PracticeSetupPage() {
           sessionLength: settings.sessionLength,
         },
   )
-  const hasOperations = config.operations.length > 0
+  const hasOperations = isMistakeReview || config.operations.length > 0
 
   return (
     <PageContainer title="Practice Setup">
@@ -42,17 +62,35 @@ function PracticeSetupPage() {
         onSubmit={(event) => {
           event.preventDefault()
           if (!hasOperations) return
-          navigate(ROUTES.practiceSession, { state: config })
+          const request: PracticeSessionRequest = isMistakeReview
+            ? { ...reviewConfig(active, config.sessionLength), mode: 'mistake-review' }
+            : config
+          navigate(ROUTES.practiceSession, { state: request })
         }}
       >
-        <OperationSelector
-          selected={config.operations}
-          onChange={(operations) => setConfig({ ...config, operations })}
+        <PracticeModeSelector
+          value={isMistakeReview ? 'mistake-review' : 'practice'}
+          onChange={setMode}
+          activeMistakeCount={active.length}
         />
-        <DifficultySelector
-          value={config.difficulty}
-          onChange={(difficulty) => setConfig({ ...config, difficulty })}
-        />
+        {isMistakeReview ? (
+          <p className="setup-review-note">
+            You’ll get questions like the ones you missed, at the level you missed them. Answer{' '}
+            {settings.masteryThreshold} related questions right in a row and that mistake is
+            mastered!
+          </p>
+        ) : (
+          <>
+            <OperationSelector
+              selected={config.operations}
+              onChange={(operations) => setConfig({ ...config, operations })}
+            />
+            <DifficultySelector
+              value={config.difficulty}
+              onChange={(difficulty) => setConfig({ ...config, difficulty })}
+            />
+          </>
+        )}
         <SessionLengthSelector
           value={config.sessionLength}
           onChange={(sessionLength) => setConfig({ ...config, sessionLength })}

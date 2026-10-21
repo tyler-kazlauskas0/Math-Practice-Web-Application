@@ -21,8 +21,12 @@ export function collectMistakes(attempts: PracticeAttempt[]): Question[] {
 /** Builds the summary shown when a session ends. */
 export function createSessionSummary(
   session: PracticeSession,
-  { isReview = false }: { isReview?: boolean } = {},
+  { isReview = false, masteredCount = 0 }: { isReview?: boolean; masteredCount?: number } = {},
 ): SessionSummary {
+  const reviewAttempts = session.attempts.filter(
+    (attempt) => attempt.question.source === 'mistake-review',
+  )
+
   const overall = tallyAttempts(session.attempts)
   const byOperation = OPERATION_OPTIONS.map(({ value: operation }) => ({
     operation,
@@ -36,6 +40,17 @@ export function createSessionSummary(
     byOperation,
     mistakes: collectMistakes(session.attempts),
     isReview,
+    mistakeReview:
+      reviewAttempts.length === 0
+        ? null
+        : {
+            questions: reviewAttempts.length,
+            correct: reviewAttempts.filter((attempt) => attempt.isCorrect).length,
+            patternsPracticed: new Set(
+              reviewAttempts.map((attempt) => attempt.question.mistakePatternId),
+            ).size,
+            mastered: masteredCount,
+          },
     startedAt: session.startedAt,
     completedAt: session.completedAt ?? new Date().toISOString(),
   }

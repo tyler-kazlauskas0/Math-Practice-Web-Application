@@ -25,7 +25,7 @@ src/
   assets/      Images, icons, and other static assets
   components/
     layout/    Page frame: header, navigation, page container
-    practice/  Practice setup controls (operation, difficulty, length)
+    practice/  Practice setup controls (mode, operation, difficulty, length)
     question/  The flip-over question card and its answer buttons
     session/   Practice session progress bar and End Session control
     settings/  Settings page toggles and Clear All Data
@@ -39,7 +39,7 @@ src/
   styles/      Global stylesheets
   test/        Test setup (Vitest + React Testing Library)
   types/       Shared TypeScript types
-  utils/       Helper functions (random numbers, IDs, session logic)
+  utils/       Helper functions (random numbers, IDs, session logic, mistake priority)
     questions/ Math question generation, validation, and questions similar to past mistakes
   App.tsx      Root component and route definitions
   main.tsx     Entry point

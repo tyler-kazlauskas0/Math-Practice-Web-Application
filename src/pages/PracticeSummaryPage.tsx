@@ -23,10 +23,14 @@ function SummaryActions({ summary }: { summary: SessionSummary }) {
     ...summary.config,
     reviewQuestions: summary.mistakes,
   }
+  // After a mistake review, Practice Again reviews mistakes again.
+  const againRequest: PracticeSessionRequest = summary.mistakeReview
+    ? { ...summary.config, mode: 'mistake-review' }
+    : summary.config
 
   return (
     <div className="summary-actions">
-      <ButtonLink to={ROUTES.practiceSession} state={summary.config}>
+      <ButtonLink to={ROUTES.practiceSession} state={againRequest}>
         Practice Again
       </ButtonLink>
       {mistakeCount > 0 ? (
@@ -97,6 +101,29 @@ function PracticeSummaryPage() {
           ]}
         />
       </div>
+
+      {summary.mistakeReview && (
+        <section className="summary-review" aria-labelledby="summary-review-heading">
+          <h2 id="summary-review-heading" className="setup-group__legend">
+            Mistake review
+          </h2>
+          <StatTiles
+            tiles={[
+              { label: 'Review questions', value: summary.mistakeReview.questions },
+              { label: 'Right', value: summary.mistakeReview.correct },
+              { label: 'Mistakes practiced', value: summary.mistakeReview.patternsPracticed },
+              { label: 'Mastered', value: summary.mistakeReview.mastered },
+            ]}
+          />
+          {summary.mistakeReview.mastered > 0 && (
+            <p className="summary-review__celebrate">
+              <span aria-hidden="true">🌟 </span>
+              You mastered {summary.mistakeReview.mastered}{' '}
+              {summary.mistakeReview.mastered === 1 ? 'mistake' : 'mistakes'}!
+            </p>
+          )}
+        </section>
+      )}
 
       {summary.byOperation.length > 1 && (
         <div className="summary-table-wrap">

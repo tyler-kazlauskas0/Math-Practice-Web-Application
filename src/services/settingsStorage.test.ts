@@ -27,6 +27,15 @@ describe('parseSettings', () => {
   })
 })
 
+describe('masteryThreshold', () => {
+  it('keeps an allowed value and falls back to the default otherwise', () => {
+    expect(parseSettings({ masteryThreshold: 5 }).masteryThreshold).toBe(5)
+    expect(parseSettings({ masteryThreshold: 1 }).masteryThreshold).toBe(3)
+    expect(parseSettings({ masteryThreshold: '4' }).masteryThreshold).toBe(3)
+    expect(parseSettings({}).masteryThreshold).toBe(3)
+  })
+})
+
 describe('loadSettings and saveSettings', () => {
   beforeEach(() => localStorage.clear())
   afterEach(() => vi.restoreAllMocks())

@@ -59,6 +59,11 @@ export interface PracticeSessionState extends PracticeSession {
    * after the last one. `null` for a normal session.
    */
   reviewQuestions: Question[] | null
+  /**
+   * For a mistake-review session, the mistake patterns (by key) in the order they take turns,
+   * most urgent first. `null` for other sessions.
+   */
+  reviewPatternOrder: string[] | null
 }
 
 /**
@@ -67,4 +72,9 @@ export interface PracticeSessionState extends PracticeSession {
  */
 export interface PracticeSessionRequest extends PracticeConfig {
   reviewQuestions?: Question[]
+  /** `'mistake-review'` asks questions related to saved mistakes instead of random ones. */
+  mode?: PracticeMode
 }
+
+/** Regular random practice, or practice built from the player's saved mistakes. */
+export type PracticeMode = 'practice' | 'mistake-review'

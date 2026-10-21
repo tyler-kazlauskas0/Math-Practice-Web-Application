@@ -30,4 +30,9 @@ export interface MistakePattern {
   firstIncorrectAt: string
   /** ISO 8601 timestamp of the most recent mistake. */
   lastIncorrectAt: string
+  /**
+   * When the player mastered this fact by answering enough related questions correctly, or
+   * `null` while it still needs review. A new mistake sets it back to `null`.
+   */
+  masteredAt: string | null
 }

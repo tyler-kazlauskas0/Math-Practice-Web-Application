@@ -41,6 +41,18 @@ export interface SessionSummary extends AttemptStatistics {
   mistakes: Question[]
   /** `true` if this was a mistake-review session. */
   isReview: boolean
+  /** Results for questions made from saved mistakes, or `null` if there were none. */
+  mistakeReview: MistakeReviewSummary | null
   startedAt: string
   completedAt: string
+}
+
+export interface MistakeReviewSummary {
+  /** Questions related to saved mistakes. */
+  questions: number
+  correct: number
+  /** Different saved mistakes those questions came from. */
+  patternsPracticed: number
+  /** Saved mistakes mastered during this session. */
+  mastered: number
 }
