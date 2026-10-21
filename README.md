@@ -33,7 +33,8 @@ src/
   styles/      Global stylesheets
   test/        Test setup (Vitest + React Testing Library)
   types/       Shared TypeScript types
-  utils/       Helper functions (e.g. problem generation)
+  utils/       Helper functions (random numbers, IDs)
+    questions/ Math question generation and validation
   App.tsx      Root component and route definitions
   main.tsx     Entry point
 ```

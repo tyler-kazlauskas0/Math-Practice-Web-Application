@@ -15,4 +15,6 @@ export interface Question {
   rightOperand: number
   /** Always a whole number; division questions are generated to divide evenly. */
   correctAnswer: number
+  /** The question as shown to the player, e.g. `7 × 8`. */
+  displayText: string
 }
