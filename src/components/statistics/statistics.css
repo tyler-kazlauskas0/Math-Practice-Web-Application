@@ -63,6 +63,8 @@
 
 .stat-card__header {
   display: flex;
+  /* With very large text the icon moves above the title, so the title keeps the full width. */
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }
@@ -81,8 +83,15 @@
   font-weight: 800;
 }
 
+.stat-card__header > div {
+  min-width: 0;
+}
+
 .stat-card__title {
   margin: 0;
+  /* A long word like "Multiplication" breaks (with a hyphen where possible) at very large text. */
+  hyphens: auto;
+  overflow-wrap: anywhere;
   font-size: var(--font-size-base);
   font-weight: 800;
 }
@@ -120,13 +129,20 @@
   background: var(--color-success);
 }
 
+/* Counts sit side by side, wrapping onto another row when the text needs more room. */
 .stat-card__counts,
 .session-row__counts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin: 0;
   text-align: center;
+}
+
+.stat-card__counts > div,
+.session-row__counts > div {
+  flex: 1 1 4rem;
+  min-width: 0;
 }
 
 .stat-card__counts dt,
@@ -189,7 +205,6 @@
 
 .session-row__counts {
   flex: 0 1 22rem;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .tag {

@@ -34,9 +34,9 @@ async function answerHonestly(user: User, getItRight: boolean) {
   const b = Number(right)
   const correct = { '+': a + b, '−': a - b, '×': a * b, '÷': a / b }[symbol]!
   const choices = screen.getAllByRole('button', { name: /^Answer / })
-  const pick = choices.find(
-    (c) => (Number(c.textContent?.replace('✓', '')) === correct) === getItRight,
-  )!
+  const valueOf = (choice: HTMLElement) =>
+    Number(choice.getAttribute('aria-label')!.replace('Answer ', ''))
+  const pick = choices.find((c) => (valueOf(c) === correct) === getItRight)!
   await user.click(pick)
   await user.click(screen.getByRole('button', { name: 'Flip Card' }))
   await user.click(
