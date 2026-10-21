@@ -98,6 +98,24 @@ export function writeJson(key: string, value: unknown): WriteResult {
   return writeText(key, text)
 }
 
+/**
+ * Removes everything this app has saved (every `math-practice:` key), including any keys
+ * added in the future. Data from other apps on the same site is left alone.
+ */
+export function clearAllAppData(): void {
+  const storage = getStorage()
+  if (!storage) return
+  try {
+    // Collect first: removing while looping over `storage.key(i)` would skip keys.
+    const keys = Array.from({ length: storage.length }, (_, i) => storage.key(i)).filter(
+      (key): key is string => key !== null && key.startsWith(STORAGE_PREFIX),
+    )
+    keys.forEach((key) => storage.removeItem(key))
+  } catch {
+    // Nothing to do: the data simply stays.
+  }
+}
+
 /** Removes one of this app's keys. Other data is never touched. */
 export function removeItem(key: string): void {
   try {

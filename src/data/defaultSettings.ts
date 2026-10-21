@@ -8,5 +8,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
   sessionLength: DEFAULT_PRACTICE_CONFIG.sessionLength,
   showTimer: false,
   soundEnabled: true,
+  showExplanations: true,
   animationsEnabled: true,
 }

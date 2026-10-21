@@ -16,3 +16,14 @@
   max-width: 24rem;
   margin: 0 auto;
 }
+
+.home__notice {
+  max-width: 32rem;
+  margin: 0 auto var(--space-4);
+  padding: var(--space-3);
+  border-left: 6px solid var(--color-success);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-weight: 700;
+  text-align: left;
+}

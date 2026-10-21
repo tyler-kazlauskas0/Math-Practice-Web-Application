@@ -16,7 +16,7 @@ export const SETTINGS_STORAGE_KEY = STORAGE_PREFIX + SETTINGS_KEY
 export function parseSettings(saved: unknown): AppSettings {
   if (typeof saved !== 'object' || saved === null) return DEFAULT_SETTINGS
   const data = saved as Record<string, unknown>
-  const boolean = (key: 'showTimer' | 'soundEnabled' | 'animationsEnabled') =>
+  const boolean = (key: 'showTimer' | 'soundEnabled' | 'showExplanations' | 'animationsEnabled') =>
     typeof data[key] === 'boolean' ? data[key] : DEFAULT_SETTINGS[key]
 
   const practice = {
@@ -37,6 +37,7 @@ export function parseSettings(saved: unknown): AppSettings {
     ...practiceSettings,
     showTimer: boolean('showTimer'),
     soundEnabled: boolean('soundEnabled'),
+    showExplanations: boolean('showExplanations'),
     animationsEnabled: boolean('animationsEnabled'),
   }
 }

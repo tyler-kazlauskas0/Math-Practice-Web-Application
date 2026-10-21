@@ -10,3 +10,6 @@ export const ROUTES = {
 
 /** Navigation state the setup page receives when the player was sent back from a missing session. */
 export const MISSING_SESSION_REASON = 'missing-session'
+
+/** Navigation state the home page receives after all app data was cleared. */
+export const DATA_CLEARED_REASON = 'data-cleared'

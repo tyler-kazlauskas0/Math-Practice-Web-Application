@@ -73,19 +73,18 @@ describe('saved practice data', () => {
     expect(loadRecentSessions()).toEqual([])
   })
 
-  it('remembers the practice choices for next time', async () => {
+  it('keeps changes made on the setup page to that one session', async () => {
     const { user, unmount } = startApp(ROUTES.practiceSetup)
     await user.click(screen.getByRole('checkbox', { name: 'Division' }))
     await user.click(screen.getByRole('radio', { name: 'Advanced' }))
-    await user.click(screen.getByRole('radio', { name: '20 questions' }))
     await user.click(screen.getByRole('button', { name: 'Start Session' }))
 
     unmount()
     startApp(ROUTES.practiceSetup)
 
+    // Back to the defaults, not the one-off choices.
     expect(screen.getByRole('checkbox', { name: 'Addition' })).toBeChecked()
-    expect(screen.getByRole('checkbox', { name: 'Division' })).toBeChecked()
-    expect(screen.getByRole('radio', { name: 'Advanced' })).toBeChecked()
-    expect(screen.getByRole('radio', { name: '20 questions' })).toBeChecked()
+    expect(screen.getByRole('checkbox', { name: 'Division' })).not.toBeChecked()
+    expect(screen.getByRole('radio', { name: 'Easy' })).toBeChecked()
   })
 })

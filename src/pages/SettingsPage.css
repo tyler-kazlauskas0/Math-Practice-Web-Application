@@ -1,3 +1,39 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.settings-page > p {
+  margin: 0;
+}
+
+.settings-intro,
+.settings-section__note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.settings-saved {
+  color: var(--color-success);
+  font-weight: 800;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.settings-section h2 {
+  margin: 0;
+}
+
+/* Buttons keep their natural width instead of stretching across the section. */
+.settings-section > .button {
+  align-self: flex-start;
+}
+
 .settings-list {
   display: flex;
   flex-direction: column;
@@ -20,6 +56,11 @@
   border-color: var(--color-primary);
 }
 
+.setting-toggle:has(.setting-toggle__input:focus-visible) {
+  outline: 4px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
 .setting-toggle__input {
   flex-shrink: 0;
   width: 1.75rem;
@@ -27,6 +68,10 @@
   margin: 0.125rem 0 0;
   accent-color: var(--color-primary);
   cursor: pointer;
+}
+
+.setting-toggle__input:focus-visible {
+  outline: none;
 }
 
 .setting-toggle__text {
@@ -44,7 +89,53 @@
   font-size: 1rem;
 }
 
-.settings-note {
-  margin-top: var(--space-5);
-  color: var(--color-text-muted);
+/* ---- Clear all data ---- */
+
+.clear-data-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 36rem;
+  padding: var(--space-4);
+  border: 4px solid var(--color-error);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.clear-data-confirm p,
+.clear-data-confirm ul {
+  margin: 0;
+}
+
+.clear-data-confirm ul {
+  padding-left: var(--space-4);
+}
+
+.clear-data-confirm__title {
+  color: var(--color-error);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+}
+
+.clear-data-confirm__label {
+  font-weight: 700;
+}
+
+.clear-data-confirm__input {
+  max-width: 14rem;
+  min-height: var(--touch-target);
+  padding: var(--space-2) var(--space-3);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.clear-data-confirm__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }

@@ -5,19 +5,26 @@ import ChoiceCard from './ChoiceCard'
 interface SessionLengthSelectorProps {
   value: SessionLength
   onChange: (sessionLength: SessionLength) => void
+  legend?: string
+  name?: string
 }
 
 /** Lets the player pick how many questions to answer. */
-function SessionLengthSelector({ value, onChange }: SessionLengthSelectorProps) {
+function SessionLengthSelector({
+  value,
+  onChange,
+  legend = 'How many questions?',
+  name = 'sessionLength',
+}: SessionLengthSelectorProps) {
   return (
     <fieldset className="setup-group">
-      <legend className="setup-group__legend">How many questions?</legend>
+      <legend className="setup-group__legend">{legend}</legend>
       <div className="choice-grid choice-grid--four">
         {SESSION_LENGTH_OPTIONS.map((option) => (
           <ChoiceCard
             key={option.value}
             type="radio"
-            name="sessionLength"
+            name={name}
             value={String(option.value)}
             checked={value === option.value}
             onChange={() => onChange(option.value)}
