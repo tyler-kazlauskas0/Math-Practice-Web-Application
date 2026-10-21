@@ -29,7 +29,7 @@ src/
     question/  The flip-over question card and its answer buttons
     session/   Practice session progress bar and End Session control
     settings/  Settings page toggles and Clear All Data
-    statistics/ Statistics page cards, recent sessions, and reset
+    statistics/ Statistics page cards, mistakes, recent sessions, and reset
     ui/        Shared UI pieces such as buttons
   context/     Shared React context (settings, mistake patterns)
   data/        Static data and configuration (e.g. route paths)

@@ -4,7 +4,7 @@ import { ROUTES } from '../../data/routes'
 const NAV_ITEMS = [
   { label: 'Home', to: ROUTES.home, activePattern: ROUTES.home },
   { label: 'Practice', to: ROUTES.practiceSetup, activePattern: '/practice/*' },
-  { label: 'Statistics', to: ROUTES.statistics, activePattern: ROUTES.statistics },
+  { label: 'Statistics', to: ROUTES.statistics, activePattern: '/statistics/*' },
   { label: 'Settings', to: ROUTES.settings, activePattern: ROUTES.settings },
 ]
 
