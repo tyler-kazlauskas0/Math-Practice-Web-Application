@@ -1,9 +1,13 @@
 import { DEFAULT_SETTINGS } from '../data/defaultSettings'
+import { migrateStorage } from './schema'
+import { readJson, STORAGE_PREFIX, writeJson } from './storage'
 import type { AppSettings } from '../types/settings'
-import { isPracticeConfig } from './practiceConfig'
+import { isPracticeConfig } from '../utils/practiceConfig'
 
-/** The browser storage key settings are saved under. */
-export const SETTINGS_STORAGE_KEY = 'math-practice:settings'
+const SETTINGS_KEY = 'settings'
+
+/** The full browser storage key settings are saved under. */
+export const SETTINGS_STORAGE_KEY = STORAGE_PREFIX + SETTINGS_KEY
 
 /**
  * Turns saved data into settings. Each field that is missing or invalid (e.g. from an older
@@ -37,22 +41,15 @@ export function parseSettings(saved: unknown): AppSettings {
   }
 }
 
-/** Reads settings from browser storage. Returns the defaults if storage is empty or unavailable. */
+/** Reads settings from browser storage. Returns the defaults if none are saved, storage is
+ * unavailable, or the saved data is broken. */
 export function loadSettings(): AppSettings {
-  try {
-    const saved = localStorage.getItem(SETTINGS_STORAGE_KEY)
-    return saved === null ? DEFAULT_SETTINGS : parseSettings(JSON.parse(saved))
-  } catch {
-    // Storage can be blocked (e.g. private browsing) or hold invalid JSON.
-    return DEFAULT_SETTINGS
-  }
+  migrateStorage()
+  const saved = readJson(SETTINGS_KEY, parseSettings)
+  return saved.status === 'ok' ? saved.value : DEFAULT_SETTINGS
 }
 
-/** Saves settings to browser storage. Does nothing if storage is unavailable. */
+/** Saves settings to browser storage. Settings still work for this visit if saving fails. */
 export function saveSettings(settings: AppSettings): void {
-  try {
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings))
-  } catch {
-    // Settings still work for this visit; they just won't be remembered.
-  }
+  writeJson(SETTINGS_KEY, settings)
 }
