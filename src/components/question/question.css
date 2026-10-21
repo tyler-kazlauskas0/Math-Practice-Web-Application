@@ -64,6 +64,24 @@
   }
 }
 
+/* A short fade-in for each new question. Not used without animation. */
+.question-card--enter {
+  animation: question-card-enter 0.25s ease-out;
+}
+
+@keyframes question-card-enter {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question-card--enter {
+    animation: none;
+  }
+}
+
 /* ---- Content ---- */
 
 .question-card__progress {

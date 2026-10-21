@@ -131,9 +131,9 @@ describe('PracticeSetupPage', () => {
     await user.click(screen.getByRole('radio', { name: 'Non-stop' }))
     await user.click(startButton())
 
-    // Non-stop: no total shown, and a way to stop.
+    // Non-stop: no total shown, and a way to end.
     expect(screen.getByText('Question 1')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Stop Practicing' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'End Session' })).toBeInTheDocument()
     // Only the chosen operations are used.
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/[+÷]/)
   })

@@ -1,4 +1,5 @@
 import type { DifficultyLevel, MathOperation } from './question'
+import type { PracticeConfig } from './session'
 
 /** Totals shared by every statistics breakdown. */
 export interface AttemptStatistics {
@@ -27,4 +28,15 @@ export interface OverallStatistics extends AttemptStatistics {
   bestStreak: number
   byOperation: Record<MathOperation, OperationStatistics>
   byDifficulty: Record<DifficultyLevel, DifficultyStatistics>
+}
+
+/** The results of one finished practice session, shown on the summary page. */
+export interface SessionSummary extends AttemptStatistics {
+  sessionId: string
+  config: PracticeConfig
+  incorrectAttempts: number
+  /** Only the operations that were actually asked, in the usual order. */
+  byOperation: OperationStatistics[]
+  startedAt: string
+  completedAt: string
 }

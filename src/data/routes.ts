@@ -7,3 +7,6 @@ export const ROUTES = {
   statistics: '/statistics',
   settings: '/settings',
 } as const
+
+/** Navigation state the setup page receives when the player was sent back from a missing session. */
+export const MISSING_SESSION_REASON = 'missing-session'

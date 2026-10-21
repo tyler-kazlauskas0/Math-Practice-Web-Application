@@ -9,7 +9,8 @@ const choices = [54, 56, 63, 48]
 
 function renderCard(props: Partial<Parameters<typeof QuestionCard>[0]> = {}) {
   const user = userEvent.setup()
-  const onComplete = vi.fn()
+  const onResult = vi.fn()
+  const onNext = vi.fn()
   const view = render(
     <QuestionCard
       question={question}
@@ -18,11 +19,12 @@ function renderCard(props: Partial<Parameters<typeof QuestionCard>[0]> = {}) {
       totalQuestions={10}
       isLastQuestion={false}
       animate
-      onComplete={onComplete}
+      onResult={onResult}
+      onNext={onNext}
       {...props}
     />,
   )
-  return { user, onComplete, ...view }
+  return { user, onResult, onNext, ...view }
 }
 
 const flipButton = () => screen.getByRole('button', { name: 'Flip Card' })
@@ -140,8 +142,22 @@ describe('QuestionCard back', () => {
     expect(wrong).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('shows Next Question after marking, and reports the result', async () => {
-    const { user, onComplete } = await flipWith(54)
+  it('reports the result once, as soon as it is marked', async () => {
+    const { user, onResult } = await flipWith(54)
+
+    await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }))
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
+
+    expect(onResult).toHaveBeenCalledTimes(1)
+    expect(onResult).toHaveBeenCalledWith({
+      selectedAnswer: 54,
+      markedCorrect: false,
+      timeTakenMs: expect.any(Number),
+    })
+  })
+
+  it('shows Next Question after marking', async () => {
+    const { user, onNext } = await flipWith(54)
     expect(screen.queryByRole('button', { name: 'Next Question' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'I Got It Wrong' }))
@@ -150,7 +166,20 @@ describe('QuestionCard back', () => {
 
     await user.click(next)
 
-    expect(onComplete).toHaveBeenCalledWith({ selectedAnswer: 54, markedCorrect: false })
+    expect(onNext).toHaveBeenCalledTimes(1)
+  })
+
+  it('measures the time from showing the card to flipping it', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const { user, onResult } = renderCard()
+
+    vi.advanceTimersByTime(4000)
+    await user.click(choice(56))
+    await user.click(flipButton())
+    await user.click(screen.getByRole('button', { name: 'I Got It Right' }))
+    vi.useRealTimers()
+
+    expect(onResult.mock.calls[0][0].timeTakenMs).toBeGreaterThanOrEqual(4000)
   })
 
   it('says Finish on the last question', async () => {

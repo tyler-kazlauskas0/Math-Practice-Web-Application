@@ -32,3 +32,26 @@ export interface PracticeSession {
   /** ISO 8601 timestamp of when the session ended, or `null` while it is in progress. */
   completedAt: string | null
 }
+
+/** The question currently on screen and its multiple-choice answers. */
+export interface PracticeRound {
+  question: Question
+  choices: number[]
+}
+
+/**
+ * Everything the practice page tracks while a session runs. The session ID, operations,
+ * difficulty, and length are in the `PracticeSession` fields (`id` and `config`).
+ */
+export interface PracticeSessionState extends PracticeSession {
+  /** The current question's position, starting at 0. */
+  currentQuestionIndex: number
+  /** `null` if a question couldn't be generated. */
+  currentRound: PracticeRound | null
+  /** When the current question appeared, in milliseconds (`Date.now()`). */
+  questionShownAt: number
+  correctCount: number
+  incorrectCount: number
+  /** `false` once the session has ended. */
+  isActive: boolean
+}
