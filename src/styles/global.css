@@ -90,3 +90,10 @@ a {
   white-space: nowrap;
   border: 0;
 }
+
+/* Keyboard tips only make sense with a mouse and keyboard, not on touch screens. */
+@media (pointer: coarse) {
+  .keyboard-only {
+    display: none;
+  }
+}

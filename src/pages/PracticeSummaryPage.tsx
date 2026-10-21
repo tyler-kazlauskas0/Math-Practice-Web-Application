@@ -5,6 +5,7 @@ import Button from '../components/ui/Button'
 import ButtonLink from '../components/ui/ButtonLink'
 import StatTiles from '../components/ui/StatTiles'
 import { ROUTES } from '../data/routes'
+import { useSettings } from '../hooks/useSettings'
 import type { PracticeSessionRequest } from '../types/session'
 import type { SessionSummary } from '../types/statistics'
 import {
@@ -13,6 +14,7 @@ import {
   listNames,
   operationLabel,
 } from '../utils/format'
+import { summaryFeedback } from '../utils/feedback'
 import { isSessionSummary } from '../utils/sessionSummary'
 
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`
@@ -62,6 +64,7 @@ function SummaryActions({ summary }: { summary: SessionSummary }) {
 
 function PracticeSummaryPage() {
   const { state: summary } = useLocation()
+  const { feedbackEnabled } = useSettings().settings
 
   if (!isSessionSummary(summary)) {
     return (
@@ -89,6 +92,7 @@ function PracticeSummaryPage() {
       <p className="summary-intro">
         You practiced <strong>{operations}</strong> at the <strong>{difficulty}</strong> level.
       </p>
+      {feedbackEnabled && <p className="summary-feedback">{summaryFeedback(summary.accuracy)}</p>}
 
       <div className="summary-tiles">
         <StatTiles
@@ -126,31 +130,59 @@ function PracticeSummaryPage() {
       )}
 
       {summary.byOperation.length > 1 && (
-        <div className="summary-table-wrap">
-          <table className="summary-table">
-            <caption className="setup-group__legend">By operation</caption>
-            <thead>
-              <tr>
-                <th scope="col">Operation</th>
-                <th scope="col">Right</th>
-                <th scope="col">Accuracy</th>
-                <th scope="col">Avg. time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.byOperation.map((stats) => (
-                <tr key={stats.operation}>
-                  <th scope="row">{operationLabel(stats.operation)}</th>
-                  <td>
-                    {stats.correctAttempts} of {stats.totalAttempts}
-                  </td>
-                  <td>{percent(stats.accuracy)}</td>
-                  <td>{seconds(stats.averageTimeMs)}</td>
+        <section className="summary-breakdown" aria-labelledby="by-operation-heading">
+          <h2 id="by-operation-heading" className="setup-group__legend">
+            By operation
+          </h2>
+          {/* A table on wider screens; the same results as cards on small screens. */}
+          <div className="summary-table-wrap">
+            <table className="summary-table" aria-labelledby="by-operation-heading">
+              <thead>
+                <tr>
+                  <th scope="col">Operation</th>
+                  <th scope="col">Right</th>
+                  <th scope="col">Accuracy</th>
+                  <th scope="col">Avg. time</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {summary.byOperation.map((stats) => (
+                  <tr key={stats.operation}>
+                    <th scope="row">{operationLabel(stats.operation)}</th>
+                    <td>
+                      {stats.correctAttempts} of {stats.totalAttempts}
+                    </td>
+                    <td>{percent(stats.accuracy)}</td>
+                    <td>{seconds(stats.averageTimeMs)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ul className="summary-cards">
+            {summary.byOperation.map((stats) => (
+              <li key={stats.operation} className="summary-card">
+                <h3 className="summary-card__title">{operationLabel(stats.operation)}</h3>
+                <dl className="summary-card__stats">
+                  <div>
+                    <dt>Right</dt>
+                    <dd>
+                      {stats.correctAttempts} of {stats.totalAttempts}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Accuracy</dt>
+                    <dd>{percent(stats.accuracy)}</dd>
+                  </div>
+                  <div>
+                    <dt>Avg. time</dt>
+                    <dd>{seconds(stats.averageTimeMs)}</dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <SummaryActions summary={summary} />

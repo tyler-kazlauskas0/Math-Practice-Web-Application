@@ -145,6 +145,13 @@
   min-width: 0;
 }
 
+/* On phones the four counts sit two by two, so no label has to break. */
+@media (max-width: 26rem) {
+  .session-row__counts > div {
+    flex-basis: 40%;
+  }
+}
+
 .stat-card__counts dt,
 .session-row__counts dt {
   color: var(--color-text-muted);

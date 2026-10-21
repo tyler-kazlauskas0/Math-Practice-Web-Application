@@ -29,6 +29,8 @@ interface QuestionCardProps {
   onResult: (result: QuestionCardResult) => void
   /** Called when the player presses Next Question or Finish. */
   onNext: () => void
+  /** Picks an encouraging message after marking, or returns `null` for none (feedback turned off). */
+  getFeedback?: (markedCorrect: boolean) => string | null
 }
 
 /**
@@ -48,11 +50,13 @@ function QuestionCard({
   enterTransition = false,
   onResult,
   onNext,
+  getFeedback,
 }: QuestionCardProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [isCardFlipped, setIsCardFlipped] = useState(false)
   const [markedCorrect, setMarkedCorrect] = useState<boolean | null>(null)
   const [timeTakenMs, setTimeTakenMs] = useState(0)
+  const [feedback, setFeedback] = useState<string | null>(null)
   const shownAtRef = useRef(0)
 
   const frontHeadingRef = useRef<HTMLHeadingElement>(null)
@@ -91,7 +95,7 @@ function QuestionCard({
         message={
           isCardFlipped && markedCorrect === null
             ? `The correct answer is ${question.correctAnswer}. You chose ${selectedAnswer}.`
-            : ''
+            : (feedback ?? '')
         }
       />
       <div className="question-card__inner">
@@ -132,10 +136,13 @@ function QuestionCard({
               totalQuestions={totalQuestions}
               selectedAnswer={selectedAnswer}
               markedCorrect={markedCorrect}
+              feedback={feedback}
+              animate={animate}
               isLastQuestion={isLastQuestion}
               onMark={(value) => {
                 if (markedCorrect !== null) return
                 setMarkedCorrect(value)
+                setFeedback(getFeedback?.(value) ?? null)
                 onResult({ selectedAnswer, markedCorrect: value, timeTakenMs })
               }}
               onNext={() => {

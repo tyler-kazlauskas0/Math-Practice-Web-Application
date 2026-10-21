@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   showTimer: false,
   soundEnabled: true,
   showExplanations: true,
+  feedbackEnabled: true,
   masteryThreshold: DEFAULT_MASTERY_THRESHOLD,
   animationsEnabled: true,
 }

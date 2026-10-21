@@ -5,6 +5,7 @@
 
 .question-card {
   --flip-duration: 0.6s;
+  width: 100%;
   max-width: 36rem;
   margin: 0 auto;
   perspective: 1600px;
@@ -128,9 +129,13 @@
 
 /* ---- Answer choices ---- */
 
+/* Two columns, dropping to one only when an answer wouldn't fit (very narrow screens or large text). */
 .answer-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(max(6.5rem, calc((100% - var(--space-3)) / 2)), 1fr)
+  );
   gap: var(--space-3);
 }
 
@@ -169,6 +174,7 @@
 }
 
 .answer-choice__key {
+  /* Shortcut numbers are a keyboard aid; hidden on touch screens (see the end of this file). */
   position: absolute;
   top: var(--space-1);
   left: var(--space-2);
@@ -248,5 +254,66 @@
 @media (prefers-reduced-motion: reduce) {
   .answer-choice {
     transition: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .answer-choice__key {
+    display: none;
+  }
+}
+
+/* Short screens (phones, and tablets turned sideways): tighter spacing so the whole card,
+   including Flip Card, fits without scrolling. Touch targets stay at least 48px tall. */
+@media (max-height: 50rem) {
+  .question-card__face {
+    gap: var(--space-3);
+    padding-block: var(--space-4);
+  }
+
+  .question-card__problem {
+    font-size: clamp(2.25rem, 9vw, 3.25rem);
+  }
+
+  .answer-choice {
+    min-height: 4rem;
+  }
+}
+
+/* ---- Encouraging feedback after marking ---- */
+
+.card-feedback {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  text-align: center;
+}
+
+.card-feedback--positive {
+  color: var(--color-success);
+}
+
+/* Supportive messages use the normal text color, not red: they shouldn't feel like a warning. */
+.card-feedback--supportive {
+  color: var(--color-text);
+}
+
+.card-feedback--pop {
+  animation: card-feedback-pop 0.35s ease-out;
+}
+
+@keyframes card-feedback-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-feedback--pop {
+    animation: none;
   }
 }

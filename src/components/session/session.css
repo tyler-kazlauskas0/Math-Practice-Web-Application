@@ -155,3 +155,128 @@
   font-weight: 800;
   text-align: center;
 }
+
+/* On short screens the page title and progress take less room, leaving it for the card. */
+@media (max-height: 50rem) {
+  .page-container:has(.practice-session) {
+    padding-top: var(--space-3);
+  }
+
+  .page-container:has(.practice-session) > h1 {
+    margin-bottom: var(--space-2);
+    font-size: var(--font-size-lg);
+  }
+
+  .practice-session {
+    gap: var(--space-3);
+  }
+}
+
+/* Very short screens (e.g. a 320×568 phone): the page title is hidden visually (screen
+   readers still hear it) and answers are a little shorter, still well above 48px. */
+@media (max-height: 37.5rem) {
+  .page-container:has(.practice-session) > h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .practice-session .answer-choice {
+    min-height: 3.5rem;
+    font-size: 1.5rem;
+  }
+
+  .practice-session .question-card__face {
+    gap: var(--space-2);
+  }
+
+  .practice-session .question-card__problem {
+    font-size: 2rem;
+  }
+}
+
+.summary-feedback {
+  margin: 0 0 var(--space-4);
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  color: var(--color-success);
+}
+
+.summary-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.summary-breakdown h2 {
+  margin: 0;
+}
+
+.summary-breakdown .summary-table-wrap {
+  margin-bottom: 0;
+}
+
+/* Small screens: cards instead of the table, so nothing has to scroll sideways. */
+.summary-cards {
+  display: none;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 40rem) {
+  .summary-breakdown .summary-table-wrap {
+    display: none;
+  }
+
+  .summary-cards {
+    display: flex;
+  }
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.summary-card__title {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+.summary-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  text-align: center;
+}
+
+.summary-card__stats > div {
+  flex: 1 1 5rem;
+  min-width: 0;
+}
+
+.summary-card__stats dt {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.summary-card__stats dd {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}

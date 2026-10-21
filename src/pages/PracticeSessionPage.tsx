@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 import PageContainer from '../components/layout/PageContainer'
 import QuestionCard from '../components/question/QuestionCard'
@@ -15,6 +15,7 @@ import { useSettings } from '../hooks/useSettings'
 import type { Question } from '../types/question'
 import type { PracticeConfig, PracticeSessionRequest } from '../types/session'
 import { isPracticeConfig } from '../utils/practiceConfig'
+import { pickFeedback } from '../utils/feedback'
 import { activePatterns } from '../utils/mistakePatterns'
 import {
   getTotalQuestions,
@@ -70,6 +71,17 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
   const { patterns } = useMistakePatterns()
   // Animate only if both the app setting and the device allow it.
   const prefersReducedMotion = usePrefersReducedMotion()
+  // Remember the last message so the next one is different.
+  const lastFeedback = useRef<string | null>(null)
+  const { feedbackEnabled } = settings
+  const getFeedback = useCallback(
+    (markedCorrect: boolean) => {
+      if (!feedbackEnabled) return null
+      lastFeedback.current = pickFeedback(markedCorrect, lastFeedback.current)
+      return lastFeedback.current
+    },
+    [feedbackEnabled],
+  )
   const animate = settings.animationsEnabled && !prefersReducedMotion
   const { state, recordResult, nextQuestion, endSession } = usePracticeSession(config, {
     reviewQuestions,
@@ -137,6 +149,7 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
           enterTransition={questionNumber > 1}
           onResult={recordResult}
           onNext={nextQuestion}
+          getFeedback={getFeedback}
         />
         <div className="session-actions">
           <EndSessionControl answered={answered} onEnd={endSession} />

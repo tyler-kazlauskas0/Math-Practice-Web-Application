@@ -97,3 +97,20 @@
 .page-container:focus {
   outline: none;
 }
+
+/* Very narrow phones: a slimmer header so more of the screen is left for practice. */
+@media (max-width: 22.5rem) {
+  .app-header__inner {
+    padding-block: var(--space-2);
+    gap: var(--space-1);
+  }
+
+  .app-header__title {
+    font-size: var(--font-size-base);
+  }
+
+  .main-nav__link {
+    padding: 0 var(--space-1);
+    font-size: 0.9375rem;
+  }
+}
