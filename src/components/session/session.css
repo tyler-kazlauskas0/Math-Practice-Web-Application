@@ -80,50 +80,8 @@
 
 /* ---- Summary ---- */
 
-.summary-totals {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-3);
-  margin: 0 0 var(--space-5);
-}
-
-.summary-totals__item {
-  display: flex;
-  flex-direction: column-reverse;
-  justify-content: flex-end;
-  padding: var(--space-3);
-  border: 3px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-surface);
-  text-align: center;
-}
-
-/* Two columns on phones, with the fifth tile spanning both; one row of five on wider screens. */
-.summary-totals__item:last-child {
-  grid-column: 1 / -1;
-}
-
-@media (min-width: 40rem) {
-  .summary-totals {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .summary-totals__item:last-child {
-    grid-column: auto;
-  }
-}
-
-.summary-totals dt {
-  color: var(--color-text-muted);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.summary-totals dd {
-  margin: 0;
-  font-size: 2.25rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
+.summary-tiles {
+  margin-bottom: var(--space-5);
 }
 
 .summary-table-wrap {

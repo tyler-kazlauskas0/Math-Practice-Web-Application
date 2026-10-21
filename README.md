@@ -28,6 +28,7 @@ src/
     practice/  Practice setup controls (operation, difficulty, length)
     question/  The flip-over question card and its answer buttons
     session/   Practice session progress bar and End Session control
+    statistics/ Statistics page cards, recent sessions, and reset
     ui/        Shared UI pieces such as buttons
   context/     Shared React context (settings)
   data/        Static data and configuration (e.g. route paths)

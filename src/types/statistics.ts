@@ -5,7 +5,8 @@ import type { PracticeConfig } from './session'
 export interface AttemptStatistics {
   totalAttempts: number
   correctAttempts: number
-  /** Fraction of attempts answered correctly, from 0 to 1. */
+  incorrectAttempts: number
+  /** Fraction of attempts answered correctly, from 0 to 1. 0 when there are no attempts. */
   accuracy: number
   /** Average time per answer, in milliseconds. */
   averageTimeMs: number
@@ -34,7 +35,6 @@ export interface OverallStatistics extends AttemptStatistics {
 export interface SessionSummary extends AttemptStatistics {
   sessionId: string
   config: PracticeConfig
-  incorrectAttempts: number
   /** Only the operations that were actually asked, in the usual order. */
   byOperation: OperationStatistics[]
   /** Questions marked wrong, once each, for the Practice Mistakes button. */
