@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { loadArchive } from './practiceHistory'
 import { CURRENT_SCHEMA_VERSION, migrateStorage, readSchemaVersion } from './schema'
 
 const VERSION_KEY = 'math-practice:schema-version'
@@ -71,5 +72,23 @@ describe('schema versioning', () => {
 
     expect(localStorage.getItem('other-app:data')).toBe('keep me')
     expect(localStorage.getItem('math-practice:unknown-key')).toBe('keep me too')
+  })
+
+  it('upgrades a version 1 history archive, keeping its totals', () => {
+    localStorage.setItem(VERSION_KEY, '1')
+    localStorage.setItem(
+      'math-practice:history-archive',
+      JSON.stringify({ sessionCount: 4, totalAttempts: 30, correctAttempts: 20 }),
+    )
+
+    expect(migrateStorage()).toBe('migrated')
+
+    expect(loadArchive()).toMatchObject({
+      sessionCount: 4,
+      totalAttempts: 30,
+      correctAttempts: 20,
+      byOperation: { addition: { totalAttempts: 0, correctAttempts: 0 } },
+      byDifficulty: { advanced: { totalAttempts: 0, correctAttempts: 0 } },
+    })
   })
 })

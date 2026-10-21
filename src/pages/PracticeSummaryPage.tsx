@@ -3,23 +3,19 @@ import PageContainer from '../components/layout/PageContainer'
 import '../components/session/session.css'
 import Button from '../components/ui/Button'
 import ButtonLink from '../components/ui/ButtonLink'
-import { DIFFICULTY_OPTIONS, OPERATION_OPTIONS } from '../data/practiceOptions'
+import StatTiles from '../components/ui/StatTiles'
 import { ROUTES } from '../data/routes'
-import type { MathOperation } from '../types/question'
 import type { PracticeSessionRequest } from '../types/session'
 import type { SessionSummary } from '../types/statistics'
+import {
+  difficultyLabel,
+  formatPercent as percent,
+  listNames,
+  operationLabel,
+} from '../utils/format'
 import { isSessionSummary } from '../utils/sessionSummary'
 
-const percent = (fraction: number) => `${Math.round(fraction * 100)}%`
 const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`
-const operationLabel = (operation: MathOperation) =>
-  OPERATION_OPTIONS.find((option) => option.value === operation)?.label ?? operation
-
-/** Joins names into a sentence: "Addition", "Addition and Division", "A, B, and C". */
-function listNames(names: string[]): string {
-  if (names.length <= 2) return names.join(' and ')
-  return `${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}`
-}
 
 function SummaryActions({ summary }: { summary: SessionSummary }) {
   const mistakeCount = summary.mistakes.length
@@ -81,9 +77,7 @@ function PracticeSummaryPage() {
     )
   }
 
-  const difficulty = DIFFICULTY_OPTIONS.find(
-    (option) => option.value === summary.config.difficulty,
-  )?.label
+  const difficulty = difficultyLabel(summary.config.difficulty)
   const operations = listNames(summary.byOperation.map((stats) => operationLabel(stats.operation)))
 
   return (
@@ -92,28 +86,17 @@ function PracticeSummaryPage() {
         You practiced <strong>{operations}</strong> at the <strong>{difficulty}</strong> level.
       </p>
 
-      <dl className="summary-totals">
-        <div className="summary-totals__item">
-          <dt>Questions</dt>
-          <dd>{summary.totalAttempts}</dd>
-        </div>
-        <div className="summary-totals__item">
-          <dt>Right</dt>
-          <dd>{summary.correctAttempts}</dd>
-        </div>
-        <div className="summary-totals__item">
-          <dt>Wrong</dt>
-          <dd>{summary.incorrectAttempts}</dd>
-        </div>
-        <div className="summary-totals__item">
-          <dt>Accuracy</dt>
-          <dd>{percent(summary.accuracy)}</dd>
-        </div>
-        <div className="summary-totals__item">
-          <dt>To review</dt>
-          <dd>{summary.mistakes.length}</dd>
-        </div>
-      </dl>
+      <div className="summary-tiles">
+        <StatTiles
+          tiles={[
+            { label: 'Questions', value: summary.totalAttempts },
+            { label: 'Right', value: summary.correctAttempts },
+            { label: 'Wrong', value: summary.incorrectAttempts },
+            { label: 'Accuracy', value: percent(summary.accuracy) },
+            { label: 'To review', value: summary.mistakes.length },
+          ]}
+        />
+      </div>
 
       {summary.byOperation.length > 1 && (
         <div className="summary-table-wrap">

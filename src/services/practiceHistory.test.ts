@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { makeQuestion } from '../test/makeQuestion'
 import {
+  clearPracticeHistory,
   loadArchive,
   loadAttempts,
   loadRecentSessions,
@@ -60,7 +61,14 @@ describe('practice sessions', () => {
 
     expect(loadRecentSessions(1000)).toHaveLength(MAX_STORED_SESSIONS)
     expect(loadRecentSessions(1000).at(-1)?.id).toBe('s3')
-    expect(loadArchive()).toEqual({ sessionCount: 3, totalAttempts: 6, correctAttempts: 3 })
+    // Each removed session had one (wrong) multiplication attempt at Easy.
+    expect(loadArchive()).toMatchObject({
+      sessionCount: 3,
+      totalAttempts: 3,
+      correctAttempts: 0,
+      byOperation: { multiplication: { totalAttempts: 3, correctAttempts: 0 } },
+      byDifficulty: { easy: { totalAttempts: 3, correctAttempts: 0 } },
+    })
     // The removed sessions' attempts go too.
     expect(loadAttempts('s0')).toEqual([])
     expect(loadAttempts('s3')).toHaveLength(1)
@@ -126,6 +134,19 @@ describe('practice attempts', () => {
     expect(saved.at(-1)?.question.id).toBe('newest')
   })
 
+  it('adds attempts removed by the limit to the archive totals', () => {
+    const many = Array.from({ length: MAX_STORED_ATTEMPTS }, (_, i) => attempt('s1', `q${i}`))
+    localStorage.setItem('math-practice:attempts', JSON.stringify(many))
+
+    saveAttempt(attempt('s1', 'newest'))
+
+    expect(loadArchive()).toMatchObject({
+      sessionCount: 0,
+      totalAttempts: 1,
+      byOperation: { multiplication: { totalAttempts: 1, correctAttempts: 0 } },
+    })
+  })
+
   it('keeps the newest half when storage is full', () => {
     const existing = Array.from({ length: 9 }, (_, i) => attempt('s1', `q${i}`))
     localStorage.setItem('math-practice:attempts', JSON.stringify(existing))
@@ -141,5 +162,25 @@ describe('practice attempts', () => {
 
     expect(saveAttempt(attempt('s1', 'newest'))).toEqual({ ok: true })
     expect(loadAttempts().map((a) => a.question.id)).toEqual(['q5', 'q6', 'q7', 'q8', 'newest'])
+  })
+})
+
+describe('clearPracticeHistory', () => {
+  it('deletes sessions, attempts, and archived totals, and nothing else', () => {
+    localStorage.setItem('math-practice:settings', '{"animationsEnabled":false}')
+    localStorage.setItem('other-app', 'keep me')
+    for (let i = 0; i < MAX_STORED_SESSIONS + 1; i++) {
+      saveSession(session(`s${i}`, i))
+      saveAttempt(attempt(`s${i}`, `q${i}`))
+    }
+    expect(loadArchive().sessionCount).toBe(1)
+
+    clearPracticeHistory()
+
+    expect(loadRecentSessions()).toEqual([])
+    expect(loadAttempts()).toEqual([])
+    expect(loadArchive()).toMatchObject({ sessionCount: 0, totalAttempts: 0 })
+    expect(localStorage.getItem('math-practice:settings')).toBe('{"animationsEnabled":false}')
+    expect(localStorage.getItem('other-app')).toBe('keep me')
   })
 })
