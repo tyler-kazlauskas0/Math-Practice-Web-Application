@@ -13,12 +13,12 @@ import { isPracticeConfig } from '../utils/practiceConfig'
 
 function PracticeSetupPage() {
   const navigate = useNavigate()
-  const { settings, updateSettings } = useSettings()
+  const { settings } = useSettings()
   const { state } = useLocation()
   const navigationState = state as { reason?: unknown; config?: unknown } | null
   const cameFromMissingSession = navigationState?.reason === MISSING_SESSION_REASON
   // Start from the previous session's choices when coming from the summary's Change Settings,
-  // otherwise from the choices saved last time.
+  // otherwise from the defaults chosen in Settings. Changes here apply to this session only.
   const [config, setConfig] = useState<PracticeConfig>(() =>
     isPracticeConfig(navigationState?.config)
       ? navigationState.config
@@ -42,12 +42,6 @@ function PracticeSetupPage() {
         onSubmit={(event) => {
           event.preventDefault()
           if (!hasOperations) return
-          // Remember these choices for next time.
-          updateSettings({
-            enabledOperations: config.operations,
-            difficulty: config.difficulty,
-            sessionLength: config.sessionLength,
-          })
           navigate(ROUTES.practiceSession, { state: config })
         }}
       >

@@ -1,12 +1,21 @@
+import { useLocation } from 'react-router'
 import PageContainer from '../components/layout/PageContainer'
 import ButtonLink from '../components/ui/ButtonLink'
-import { ROUTES } from '../data/routes'
+import { DATA_CLEARED_REASON, ROUTES } from '../data/routes'
 import './HomePage.css'
 
 function HomePage() {
+  const { state } = useLocation()
+  const dataCleared = (state as { reason?: unknown } | null)?.reason === DATA_CLEARED_REASON
+
   return (
     <PageContainer>
       <section className="home">
+        {dataCleared && (
+          <p className="home__notice" role="status">
+            All app data was deleted. Everything is back to the way it started.
+          </p>
+        )}
         <h1>
           Welcome to Math Practice! <span aria-hidden="true">👋</span>
         </h1>

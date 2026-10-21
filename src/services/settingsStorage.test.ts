@@ -10,6 +10,7 @@ describe('parseSettings', () => {
       difficulty: 'advanced',
       sessionLength: 'continuous',
       animationsEnabled: false,
+      showExplanations: false,
     }
     expect(parseSettings(saved)).toEqual(saved)
   })

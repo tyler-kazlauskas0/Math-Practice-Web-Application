@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { SettingsContext } from '../context/settingsContext'
+import { DEFAULT_SETTINGS } from '../data/defaultSettings'
 import type { AppSettings } from '../types/settings'
 import { loadSettings, saveSettings } from '../services/settingsStorage'
 
@@ -15,8 +16,12 @@ function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings((current) => ({ ...current, ...changes }))
   }
 
+  function resetSettings() {
+    setSettings(DEFAULT_SETTINGS)
+  }
+
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, resetSettings }}>
       {children}
     </SettingsContext.Provider>
   )

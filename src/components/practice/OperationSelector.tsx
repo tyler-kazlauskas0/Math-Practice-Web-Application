@@ -6,10 +6,21 @@ import ChoiceCard from './ChoiceCard'
 interface OperationSelectorProps {
   selected: MathOperation[]
   onChange: (operations: MathOperation[]) => void
+  legend?: string
+  /** Shown under the legend. Linked to the group so screen readers read it too. */
+  hint?: string
+  /** Prefix for the inputs' names and ids, so two selectors can share a page. */
+  name?: string
 }
 
 /** Lets the player pick one or more operations to practice. */
-function OperationSelector({ selected, onChange }: OperationSelectorProps) {
+function OperationSelector({
+  selected,
+  onChange,
+  legend = 'What do you want to practice?',
+  hint = 'Pick one or more.',
+  name = 'operations',
+}: OperationSelectorProps) {
   const allSelected = selected.length === OPERATION_OPTIONS.length
 
   function toggle(operation: MathOperation) {
@@ -26,14 +37,14 @@ function OperationSelector({ selected, onChange }: OperationSelectorProps) {
 
   return (
     <fieldset className="setup-group">
-      <legend className="setup-group__legend">What do you want to practice?</legend>
-      <p className="setup-group__hint">Pick one or more.</p>
+      <legend className="setup-group__legend">{legend}</legend>
+      <p className="setup-group__hint">{hint}</p>
       <div className="choice-grid choice-grid--four">
         {OPERATION_OPTIONS.map((option) => (
           <ChoiceCard
             key={option.value}
             type="checkbox"
-            name="operations"
+            name={name}
             value={option.value}
             checked={selected.includes(option.value)}
             onChange={() => toggle(option.value)}

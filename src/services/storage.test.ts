@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  clearAllAppData,
   isQuotaExceededError,
   isStorageAvailable,
   readJson,
@@ -82,6 +83,18 @@ describe('storage service', () => {
     removeItem('other-app')
 
     expect(localStorage.getItem('math-practice:mine')).toBeNull()
+    expect(localStorage.getItem('other-app')).toBe('keep me')
+  })
+
+  it('clears every app key, and nothing else', () => {
+    writeText('settings', 'x')
+    writeText('sessions', 'y')
+    writeText('some-future-key', 'z')
+    localStorage.setItem('other-app', 'keep me')
+
+    clearAllAppData()
+
+    expect(localStorage.length).toBe(1)
     expect(localStorage.getItem('other-app')).toBe('keep me')
   })
 })
