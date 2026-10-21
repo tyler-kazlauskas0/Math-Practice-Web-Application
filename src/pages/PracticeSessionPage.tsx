@@ -6,9 +6,11 @@ import EndSessionControl from '../components/session/EndSessionControl'
 import SessionProgress from '../components/session/SessionProgress'
 import '../components/session/session.css'
 import ButtonLink from '../components/ui/ButtonLink'
+import LiveAnnouncement from '../components/ui/LiveAnnouncement'
 import { MISSING_SESSION_REASON, ROUTES } from '../data/routes'
 import { usePracticeSession } from '../hooks/usePracticeSession'
 import { useMistakePatterns } from '../hooks/useMistakePatterns'
+import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { useSettings } from '../hooks/useSettings'
 import type { Question } from '../types/question'
 import type { PracticeConfig, PracticeSessionRequest } from '../types/session'
@@ -16,6 +18,7 @@ import { isPracticeConfig } from '../utils/practiceConfig'
 import { activePatterns } from '../utils/mistakePatterns'
 import {
   getTotalQuestions,
+  hasRecordedCurrent,
   isOnLastQuestion,
   isReviewSession,
   validReviewQuestions,
@@ -65,6 +68,9 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
   const navigate = useNavigate()
   const { settings } = useSettings()
   const { patterns } = useMistakePatterns()
+  // Animate only if both the app setting and the device allow it.
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const animate = settings.animationsEnabled && !prefersReducedMotion
   const { state, recordResult, nextQuestion, endSession } = usePracticeSession(config, {
     reviewQuestions,
     mistakeReview,
@@ -104,10 +110,19 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
   if (ended) return null
 
   const questionNumber = state.currentQuestionIndex + 1
+  // For screen readers: progress after each answer is marked, and each new question.
+  const announcement = hasRecordedCurrent(state)
+    ? totalQuestions === null
+      ? `${answered} answered, ${state.correctCount} right.`
+      : `${answered} of ${totalQuestions} answered, ${state.correctCount} right.`
+    : questionNumber > 1
+      ? `Question ${questionNumber}${totalQuestions === null ? '' : ` of ${totalQuestions}`}.`
+      : ''
 
   return (
     <PageContainer title={title}>
       <div className="practice-session">
+        <LiveAnnouncement message={announcement} />
         <SessionProgress answered={answered} total={totalQuestions} correct={state.correctCount} />
         <QuestionCard
           // A new key per question gives a fresh card: nothing selected, not flipped.
@@ -117,7 +132,7 @@ function PracticeSession({ config, reviewQuestions, mistakeReview }: PracticeSes
           questionNumber={questionNumber}
           totalQuestions={totalQuestions}
           isLastQuestion={isOnLastQuestion(state)}
-          animate={settings.animationsEnabled}
+          animate={animate}
           autoFocus={questionNumber > 1}
           enterTransition={questionNumber > 1}
           onResult={recordResult}

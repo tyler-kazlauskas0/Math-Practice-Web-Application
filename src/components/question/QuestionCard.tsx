@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Question } from '../../types/question'
+import LiveAnnouncement from '../ui/LiveAnnouncement'
 import QuestionCardBack from './QuestionCardBack'
 import QuestionCardFront from './QuestionCardFront'
 import './question.css'
@@ -86,6 +87,13 @@ function QuestionCard({
 
   return (
     <section className={classes} aria-label={`Question ${questionNumber}`}>
+      <LiveAnnouncement
+        message={
+          isCardFlipped && markedCorrect === null
+            ? `The correct answer is ${question.correctAnswer}. You chose ${selectedAnswer}.`
+            : ''
+        }
+      />
       <div className="question-card__inner">
         {/* The hidden side is inert so it can't be focused, clicked, or read out. */}
         <div

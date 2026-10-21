@@ -40,8 +40,8 @@ describe('QuestionCard front', () => {
     expect(
       within(group)
         .getAllByRole('button')
-        .map((button) => button.textContent),
-    ).toEqual(['54', '56', '63', '48'])
+        .map((button) => button.getAttribute('aria-label')),
+    ).toEqual(['Answer 54', 'Answer 56', 'Answer 63', 'Answer 48'])
   })
 
   it('shows only the question number in non-stop practice', () => {

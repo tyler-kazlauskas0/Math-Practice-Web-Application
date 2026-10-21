@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react'
 import './statTiles.css'
 
 export interface StatTile {
@@ -9,11 +8,7 @@ export interface StatTile {
 /** A row of big numbers with labels, e.g. "10 Questions · 8 Right". */
 function StatTiles({ tiles, label }: { tiles: StatTile[]; label?: string }) {
   return (
-    <dl
-      className="stat-tiles"
-      aria-label={label}
-      style={{ '--tile-count': tiles.length } as CSSProperties}
-    >
+    <dl className="stat-tiles" aria-label={label}>
       {tiles.map((tile) => (
         <div key={tile.label} className="stat-tiles__item">
           <dt>{tile.label}</dt>

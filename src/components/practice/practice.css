@@ -24,9 +24,10 @@
   align-self: flex-start;
 }
 
+/* As many columns as fit, each at least 7em wide: two on most phones, one with large text. */
 .choice-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7em), 1fr));
   gap: var(--space-3);
 }
 
@@ -34,12 +35,6 @@
 @media (max-width: 30rem) {
   .choice-grid--two {
     grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (min-width: 48rem) {
-  .choice-grid--four {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -53,7 +48,7 @@
   min-height: 6rem;
   /* Extra top padding leaves room for the checkmark badge. */
   padding: var(--space-5) var(--space-2) var(--space-3);
-  border: 3px solid var(--color-border);
+  border: 3px solid var(--color-border-control);
   border-radius: var(--radius);
   background: var(--color-surface);
   text-align: center;
@@ -80,7 +75,7 @@
 }
 
 .choice-card--disabled:hover {
-  border-color: var(--color-border);
+  border-color: var(--color-border-control);
 }
 
 .choice-card--disabled .choice-card__label {

@@ -1,26 +1,15 @@
-/* Two columns on phones (an odd last tile spans both); one row on wider screens. */
+/* Tiles wrap onto new rows when there isn't room, and grow to fill each row. The minimum
+   width is in text units, so larger text (or zoom) means fewer tiles per row. */
 .stat-tiles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   margin: 0;
 }
 
-.stat-tiles__item:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-}
-
-@media (min-width: 40rem) {
-  .stat-tiles {
-    grid-template-columns: repeat(var(--tile-count, 4), minmax(0, 1fr));
-  }
-
-  .stat-tiles__item:last-child:nth-child(odd) {
-    grid-column: auto;
-  }
-}
-
 .stat-tiles__item {
+  flex: 1 1 7.5em;
+  min-width: 0;
   display: flex;
   flex-direction: column-reverse;
   justify-content: flex-end;

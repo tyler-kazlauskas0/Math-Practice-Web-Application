@@ -1,6 +1,7 @@
 import type { Ref } from 'react'
 import type { Question } from '../../types/question'
 import Button from '../ui/Button'
+import { speakAnswer } from '../../utils/questions/spokenText'
 import QuestionProgress from './QuestionProgress'
 
 interface QuestionCardBackProps {
@@ -34,8 +35,14 @@ function QuestionCardBack({
 
   return (
     <>
+      <p className="question-card__side">Answer side</p>
       <QuestionProgress questionNumber={questionNumber} totalQuestions={totalQuestions} />
-      <h2 className="question-card__problem" ref={headingRef} tabIndex={-1}>
+      <h2
+        className="question-card__problem"
+        ref={headingRef}
+        tabIndex={-1}
+        aria-label={speakAnswer(question)}
+      >
         {question.displayText} = {question.correctAnswer}
       </h2>
       <dl className="answer-comparison">
@@ -60,7 +67,7 @@ function QuestionCardBack({
             disabled={hasMarked}
             onClick={() => onMark(true)}
           >
-            I Got It Right
+            {markedCorrect === true && <span aria-hidden="true">✓ </span>}I Got It Right
           </Button>
           <Button
             variant="danger"
@@ -68,7 +75,7 @@ function QuestionCardBack({
             disabled={hasMarked}
             onClick={() => onMark(false)}
           >
-            I Got It Wrong
+            {markedCorrect === false && <span aria-hidden="true">✓ </span>}I Got It Wrong
           </Button>
         </div>
       </div>

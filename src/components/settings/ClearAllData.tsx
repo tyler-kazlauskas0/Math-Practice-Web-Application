@@ -36,54 +36,58 @@ function ClearAllData({ onClear }: { onClear: () => void }) {
   }
 
   return (
-    <form
+    <div
       className="clear-data-confirm"
       role="alertdialog"
       aria-labelledby="clear-data-title"
       aria-describedby="clear-data-warning"
-      onSubmit={(event) => {
-        event.preventDefault()
-        if (confirmed) onClear()
-      }}
       onKeyDown={(event) => {
         if (event.key === 'Escape') close()
       }}
     >
-      <p id="clear-data-title" className="clear-data-confirm__title">
-        <span aria-hidden="true">⚠️ </span>Delete everything?
-      </p>
-      <div id="clear-data-warning">
-        <p>This permanently deletes all of this app’s data on this device:</p>
-        <ul>
-          <li>every practice session and answer</li>
-          <li>all statistics and mistakes to review</li>
-          <li>all of your settings</li>
-        </ul>
-        <p>
-          <strong>This can’t be undone.</strong>
+      <form
+        className="clear-data-confirm__form"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (confirmed) onClear()
+        }}
+      >
+        <p id="clear-data-title" className="clear-data-confirm__title">
+          <span aria-hidden="true">⚠️ </span>Delete everything?
         </p>
-      </div>
-      <label className="clear-data-confirm__label" htmlFor="clear-data-input">
-        Type <strong>{CONFIRM_WORD}</strong> to confirm
-      </label>
-      <input
-        ref={inputRef}
-        id="clear-data-input"
-        className="clear-data-confirm__input"
-        value={typed}
-        onChange={(event) => setTyped(event.target.value)}
-        autoComplete="off"
-        spellCheck={false}
-      />
-      <div className="clear-data-confirm__buttons">
-        <Button type="submit" variant="danger" disabled={!confirmed}>
-          Delete Everything
-        </Button>
-        <Button variant="secondary" onClick={close}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+        <div id="clear-data-warning">
+          <p>This permanently deletes all of this app’s data on this device:</p>
+          <ul>
+            <li>every practice session and answer</li>
+            <li>all statistics and mistakes to review</li>
+            <li>all of your settings</li>
+          </ul>
+          <p>
+            <strong>This can’t be undone.</strong>
+          </p>
+        </div>
+        <label className="clear-data-confirm__label" htmlFor="clear-data-input">
+          Type <strong>{CONFIRM_WORD}</strong> to confirm
+        </label>
+        <input
+          ref={inputRef}
+          id="clear-data-input"
+          className="clear-data-confirm__input"
+          value={typed}
+          onChange={(event) => setTyped(event.target.value)}
+          autoComplete="off"
+          spellCheck={false}
+        />
+        <div className="clear-data-confirm__buttons">
+          <Button type="submit" variant="danger" disabled={!confirmed}>
+            Delete Everything
+          </Button>
+          <Button variant="secondary" onClick={close}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }
 

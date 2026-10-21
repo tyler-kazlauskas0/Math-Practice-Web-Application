@@ -60,3 +60,13 @@ Nothing is sent to a server.
 | `math-practice:mistake-patterns` | One record per math fact answered wrong (up to 500), for mistake practice     |
 
 When the format changes, increase `CURRENT_SCHEMA_VERSION` and add a migration to `MIGRATIONS`.
+
+## Accessibility
+
+- Everything works with a keyboard: Tab, Enter, and Space, plus number keys 1–4 to choose an answer.
+- Screen readers hear questions in words ("What is 7 times 8?") and are told about new questions,
+  the revealed answer, and progress.
+- Card animations turn off with the device's "reduce motion" setting or the app's own setting.
+- Choices and results never rely on color alone; colors meet WCAG AA contrast
+  (checked by `src/styles/contrast.test.ts`).
+- `src/accessibility.test.tsx` runs the axe checker on every page and card state.
