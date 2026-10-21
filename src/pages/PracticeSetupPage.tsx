@@ -57,7 +57,8 @@ function PracticeSetupPage() {
       <ResumeSessionBanner />
       {cameFromMissingSession && (
         <p className="setup-notice" role="status">
-          Choose what you want to practice, then press Start Session.
+          There’s no practice session to continue. It may have already finished, or the page was
+          opened from an old link. Choose what you want to practice to start a new one.
         </p>
       )}
       <form

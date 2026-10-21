@@ -1,0 +1,35 @@
+.error-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 36rem;
+  padding: var(--space-4);
+  border: 3px solid var(--color-primary);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.error-message__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.error-message__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.error-message__body p {
+  margin: 0 0 var(--space-2);
+}
+
+.error-message__body p:last-child {
+  margin-bottom: 0;
+}
+
+.error-message__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

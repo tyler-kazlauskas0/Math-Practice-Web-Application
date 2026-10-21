@@ -63,6 +63,19 @@ Nothing is sent to a server.
 
 When the format changes, increase `CURRENT_SCHEMA_VERSION` and add a migration to `MIGRATIONS`.
 
+## Error handling
+
+- **Damaged saved data:** on startup, `checkAndRepairStoredData` (`src/services/dataHealth.ts`)
+  checks each key above. Unreadable data resets only that key, and bad records are removed from
+  a list without touching the good ones. A short notice tells the player what was started fresh.
+- **Saving problems:** if the browser blocks storage or runs out of space, a notice explains that
+  progress won't be kept. Practice still works.
+- **Question generation:** generated questions are validated and retried. If that still fails, a
+  simple valid fallback question (`src/utils/questions/fallbackQuestion.ts`) keeps practice going.
+- **Page crashes:** a friendly error page with **Try Again** and **Go Home** replaces the crashed
+  page. Stack traces are never shown. In development, errors are logged to the console with
+  `logDevError` (`src/utils/devLog.ts`).
+
 ## Accessibility
 
 - Everything works with a keyboard: Tab, Enter, and Space, plus number keys 1–4 to choose an answer.

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import DataNotices from './DataNotices'
 import Header from './Header'
 import './layout.css'
 
@@ -18,6 +19,7 @@ function AppLayout() {
         Skip to main content
       </a>
       <Header />
+      <DataNotices />
       <Outlet />
     </>
   )
