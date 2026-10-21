@@ -1,0 +1,210 @@
+/* ---- Card and flip ----
+   Both faces sit in the same grid cell, so the card is always as tall as its taller side
+   and the two faces line up exactly. The back face is pre-rotated 180°, so when the whole
+   card turns 180° the back ends up facing forward and reads normally (not mirrored). */
+
+.question-card {
+  --flip-duration: 0.6s;
+  max-width: 36rem;
+  margin: 0 auto;
+  perspective: 1600px;
+}
+
+.question-card__inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform var(--flip-duration) ease-in-out;
+}
+
+.question-card--flipped .question-card__inner {
+  transform: rotateY(180deg);
+}
+
+.question-card__face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5) clamp(var(--space-3), 5vw, var(--space-5));
+  border: 3px solid var(--color-border);
+  border-radius: calc(var(--radius) * 1.5);
+  background: var(--color-surface);
+  box-shadow: 0 6px 18px rgb(31 41 55 / 0.12);
+  backface-visibility: hidden;
+}
+
+.question-card__face--back {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: rotateY(180deg);
+}
+
+/* Without animation (turned off in Settings, or the device asks for reduced motion) the
+   card doesn't rotate at all: the hidden side is simply not shown. */
+.question-card--no-animation .question-card__inner,
+.question-card--no-animation .question-card__face--back {
+  transform: none;
+  transition: none;
+}
+
+.question-card--no-animation .question-card__face[aria-hidden='true'] {
+  visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question-card .question-card__inner,
+  .question-card .question-card__face--back {
+    transform: none;
+    transition: none;
+  }
+
+  .question-card .question-card__face[aria-hidden='true'] {
+    visibility: hidden;
+  }
+}
+
+/* ---- Content ---- */
+
+.question-card__progress {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.question-card__problem {
+  margin: 0;
+  font-size: clamp(2.5rem, 11vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.question-card__problem:focus {
+  outline: none;
+}
+
+.question-card__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.question-card__action {
+  align-self: center;
+  min-width: min(100%, 16rem);
+}
+
+/* ---- Answer choices ---- */
+
+.answer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.answer-choice {
+  position: relative;
+  min-height: 4.5rem;
+  padding: var(--space-2);
+  border: 3px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: clamp(1.75rem, 7vw, 2.25rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+
+.answer-choice:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.answer-choice--selected,
+.answer-choice--selected:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+.answer-choice:disabled {
+  cursor: default;
+}
+
+.answer-choice__check {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-2);
+  font-size: 1.25rem;
+}
+
+/* ---- Back of the card ---- */
+
+.answer-comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.answer-comparison__item {
+  /* Keeps the two numbers level when one label wraps onto two lines. */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.answer-comparison dt {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.answer-comparison dd {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.self-check {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.self-check__question {
+  margin: 0;
+  font-weight: 800;
+  text-align: center;
+}
+
+.self-check__buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 26rem) {
+  .self-check__buttons {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .answer-choice {
+    transition: none;
+  }
+}

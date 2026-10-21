@@ -1,0 +1,84 @@
+import type { Ref } from 'react'
+import type { Question } from '../../types/question'
+import Button from '../ui/Button'
+import QuestionProgress from './QuestionProgress'
+
+interface QuestionCardBackProps {
+  question: Question
+  questionNumber: number
+  totalQuestions: number | null
+  selectedAnswer: number
+  /** The player's own verdict, or `null` until they choose. */
+  markedCorrect: boolean | null
+  isLastQuestion: boolean
+  onMark: (markedCorrect: boolean) => void
+  onNext: () => void
+  headingRef?: Ref<HTMLHeadingElement>
+  nextButtonRef?: Ref<HTMLButtonElement>
+}
+
+/** The back of the card: the answer, the player's choice, and buttons to mark it right or wrong. */
+function QuestionCardBack({
+  question,
+  questionNumber,
+  totalQuestions,
+  selectedAnswer,
+  markedCorrect,
+  isLastQuestion,
+  onMark,
+  onNext,
+  headingRef,
+  nextButtonRef,
+}: QuestionCardBackProps) {
+  const hasMarked = markedCorrect !== null
+
+  return (
+    <>
+      <QuestionProgress questionNumber={questionNumber} totalQuestions={totalQuestions} />
+      <h2 className="question-card__problem" ref={headingRef} tabIndex={-1}>
+        {question.displayText} = {question.correctAnswer}
+      </h2>
+      <dl className="answer-comparison">
+        <div className="answer-comparison__item">
+          <dt>Correct answer</dt>
+          <dd>{question.correctAnswer}</dd>
+        </div>
+        <div className="answer-comparison__item">
+          <dt>Your answer</dt>
+          <dd>{selectedAnswer}</dd>
+        </div>
+      </dl>
+      <div className="self-check" role="group" aria-labelledby={`self-check-${question.id}`}>
+        <p className="self-check__question" id={`self-check-${question.id}`}>
+          Did you get it right?
+        </p>
+        <div className="self-check__buttons">
+          {/* Once either is chosen both are disabled, so only one can count for this question. */}
+          <Button
+            variant="success"
+            aria-pressed={markedCorrect === true}
+            disabled={hasMarked}
+            onClick={() => onMark(true)}
+          >
+            I Got It Right
+          </Button>
+          <Button
+            variant="danger"
+            aria-pressed={markedCorrect === false}
+            disabled={hasMarked}
+            onClick={() => onMark(false)}
+          >
+            I Got It Wrong
+          </Button>
+        </div>
+      </div>
+      {hasMarked && (
+        <Button className="question-card__action" ref={nextButtonRef} onClick={onNext}>
+          {isLastQuestion ? 'Finish' : 'Next Question'}
+        </Button>
+      )}
+    </>
+  )
+}
+
+export default QuestionCardBack
