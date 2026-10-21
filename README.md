@@ -31,11 +31,11 @@ src/
     settings/  Settings page toggles and Clear All Data
     statistics/ Statistics page cards, recent sessions, and reset
     ui/        Shared UI pieces such as buttons
-  context/     Shared React context (settings)
+  context/     Shared React context (settings, mistake patterns)
   data/        Static data and configuration (e.g. route paths)
   hooks/       Custom React hooks (e.g. useSettings)
   pages/       One component per route
-  services/    Saved data: localStorage wrapper, data versioning, settings, practice history
+  services/    Saved data: localStorage wrapper, data versioning, settings, history, mistakes
   styles/      Global stylesheets
   test/        Test setup (Vitest + React Testing Library)
   types/       Shared TypeScript types
@@ -50,12 +50,13 @@ src/
 Everything is saved in the browser's `localStorage` under keys starting with `math-practice:`.
 Nothing is sent to a server.
 
-| Key                             | Contents                                                        |
-| ------------------------------- | --------------------------------------------------------------- |
-| `math-practice:schema-version`  | Version of the saved data format (see `src/services/schema.ts`) |
-| `math-practice:settings`        | Settings and the last practice choices                          |
-| `math-practice:sessions`        | The newest 100 practice sessions (without their answers)        |
-| `math-practice:attempts`        | Every answer from those sessions, up to 5,000                   |
-| `math-practice:history-archive` | Totals for older sessions that are no longer kept in full       |
+| Key                              | Contents                                                                      |
+| -------------------------------- | ----------------------------------------------------------------------------- |
+| `math-practice:schema-version`   | Version of the saved data format (see `src/services/schema.ts`)               |
+| `math-practice:settings`         | Settings, including the default practice choices                              |
+| `math-practice:sessions`         | The newest 100 practice sessions (without their answers)                      |
+| `math-practice:attempts`         | Every answer from those sessions, up to 5,000                                 |
+| `math-practice:history-archive`  | Totals (overall, per operation, per level) for answers no longer kept in full |
+| `math-practice:mistake-patterns` | One record per math fact answered wrong (up to 500), for mistake practice     |
 
 When the format changes, increase `CURRENT_SCHEMA_VERSION` and add a migration to `MIGRATIONS`.

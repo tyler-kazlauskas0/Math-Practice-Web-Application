@@ -160,7 +160,7 @@ describe('practice attempts', () => {
       original.call(this, key, value)
     })
 
-    expect(saveAttempt(attempt('s1', 'newest'))).toEqual({ ok: true })
+    expect(saveAttempt(attempt('s1', 'newest'))).toEqual({ ok: true, isNew: true })
     expect(loadAttempts().map((a) => a.question.id)).toEqual(['q5', 'q6', 'q7', 'q8', 'newest'])
   })
 })

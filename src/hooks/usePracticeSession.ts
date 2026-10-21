@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react'
 import { saveAttempt, saveSession, toStoredSession } from '../services/practiceHistory'
+import { useMistakePatterns } from './useMistakePatterns'
 import type { Question } from '../types/question'
 import type { PracticeConfig, PracticeRound, PracticeSessionState } from '../types/session'
 import {
@@ -37,6 +38,7 @@ export function usePracticeSession(
   config: PracticeConfig,
   reviewQuestions: Question[] | null = null,
 ) {
+  const { recordAttempt } = useMistakePatterns()
   const [state, dispatch] = useReducer(practiceSessionReducer, null, () => {
     const first = reviewQuestions
       ? tryCreate(() => createReviewRound(reviewQuestions[0]))
@@ -46,12 +48,14 @@ export function usePracticeSession(
 
   // Save each answer as soon as it's recorded, and keep the session record up to date, so
   // nothing is lost if the browser is closed mid-session. Sessions with no answers aren't saved.
+  // A wrong answer also updates its mistake pattern, once (this effect can run more than once).
   useEffect(() => {
     const latest = state.attempts.at(-1)
     if (!latest) return
-    saveAttempt({ ...latest, sessionId: state.id })
+    const saved = saveAttempt({ ...latest, sessionId: state.id })
+    if (saved.isNew) recordAttempt(latest)
     saveSession(toStoredSession(state))
-  }, [state])
+  }, [state, recordAttempt])
 
   return {
     state,

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { loadMistakePatterns } from './mistakePatterns'
 import { loadArchive } from './practiceHistory'
 import { CURRENT_SCHEMA_VERSION, migrateStorage, readSchemaVersion } from './schema'
 
@@ -90,5 +91,45 @@ describe('schema versioning', () => {
       byOperation: { addition: { totalAttempts: 0, correctAttempts: 0 } },
       byDifficulty: { advanced: { totalAttempts: 0, correctAttempts: 0 } },
     })
+  })
+
+  it('builds mistake patterns from wrong answers saved before version 3', () => {
+    const wrongAnswer = (answeredAt: string, userAnswer: number) => ({
+      sessionId: 's1',
+      question: {
+        id: answeredAt,
+        operation: 'multiplication',
+        difficulty: 'easy',
+        leftOperand: 7,
+        rightOperand: 8,
+        correctAnswer: 56,
+        displayText: '7 × 8',
+      },
+      userAnswer,
+      isCorrect: false,
+      timeTakenMs: 1000,
+      answeredAt,
+    })
+    localStorage.setItem(VERSION_KEY, '2')
+    localStorage.setItem(
+      'math-practice:attempts',
+      JSON.stringify([
+        wrongAnswer('2026-10-21T10:00:00.000Z', 54),
+        { ...wrongAnswer('2026-10-21T10:01:00.000Z', 56), isCorrect: true },
+        wrongAnswer('2026-10-21T10:02:00.000Z', 63),
+        { broken: true },
+      ]),
+    )
+
+    expect(migrateStorage()).toBe('migrated')
+
+    expect(loadMistakePatterns()).toEqual([
+      expect.objectContaining({
+        key: 'multiplication:7:8',
+        incorrectCount: 2,
+        incorrectAnswers: [54, 63],
+        lastIncorrectAt: '2026-10-21T10:02:00.000Z',
+      }),
+    ])
   })
 })

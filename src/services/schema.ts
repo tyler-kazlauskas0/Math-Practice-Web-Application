@@ -1,11 +1,11 @@
-import { addArchiveBreakdowns } from './migrations'
+import { addArchiveBreakdowns, buildMistakePatternsFromAttempts } from './migrations'
 import { readText, writeText } from './storage'
 
 /**
  * The version of the saved data's format. Increase it whenever the format changes, and add
  * a migration that upgrades data from the previous version.
  */
-export const CURRENT_SCHEMA_VERSION = 2
+export const CURRENT_SCHEMA_VERSION = 3
 
 export const SCHEMA_VERSION_KEY = 'schema-version'
 
@@ -21,6 +21,7 @@ type Migration = () => void
 export const MIGRATIONS: Record<number, Migration> = {
   0: () => {},
   1: addArchiveBreakdowns,
+  2: buildMistakePatternsFromAttempts,
 }
 
 export type MigrationResult =
