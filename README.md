@@ -40,7 +40,7 @@ src/
   test/        Test setup (Vitest + React Testing Library)
   types/       Shared TypeScript types
   utils/       Helper functions (random numbers, IDs, session logic)
-    questions/ Math question generation and validation
+    questions/ Math question generation, validation, and questions similar to past mistakes
   App.tsx      Root component and route definitions
   main.tsx     Entry point
 ```

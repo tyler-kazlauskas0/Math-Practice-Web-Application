@@ -17,4 +17,11 @@ export interface Question {
   correctAnswer: number
   /** The question as shown to the player, e.g. `7 × 8`. */
   displayText: string
+  /** Why the question was asked. Missing means an ordinary random practice question. */
+  source?: QuestionSource
+  /** For a `mistake-review` question, the key of the mistake pattern it was made from. */
+  mistakePatternId?: string
 }
+
+/** Where a question came from: random practice, or practice built from a past mistake. */
+export type QuestionSource = 'practice' | 'mistake-review'
