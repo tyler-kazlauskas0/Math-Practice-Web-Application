@@ -131,10 +131,10 @@ describe('PracticeSetupPage', () => {
     await user.click(screen.getByRole('radio', { name: 'Non-stop' }))
     await user.click(startButton())
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Practice' })).toBeInTheDocument()
-    const summary = screen.getByText('Operations').closest('dl')
-    expect(summary).toHaveTextContent('OperationsAddition, Division')
-    expect(summary).toHaveTextContent('DifficultyIntermediate')
-    expect(summary).toHaveTextContent('QuestionsNon-stop')
+    // Non-stop: no total shown, and a way to stop.
+    expect(screen.getByText('Question 1')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Stop Practicing' })).toBeInTheDocument()
+    // Only the chosen operations are used.
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(/[+÷]/)
   })
 })

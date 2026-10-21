@@ -26,9 +26,11 @@ src/
   components/
     layout/    Page frame: header, navigation, page container
     practice/  Practice setup controls (operation, difficulty, length)
+    question/  The flip-over question card and its answer buttons
     ui/        Shared UI pieces such as buttons
+  context/     Shared React context (settings)
   data/        Static data and configuration (e.g. route paths)
-  hooks/       Custom React hooks
+  hooks/       Custom React hooks (e.g. useSettings)
   pages/       One component per route
   styles/      Global stylesheets
   test/        Test setup (Vitest + React Testing Library)

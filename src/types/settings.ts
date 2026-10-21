@@ -10,4 +10,6 @@ export interface AppSettings {
   /** Show a timer while answering questions. */
   showTimer: boolean
   soundEnabled: boolean
+  /** Animate the question card when it flips. Animations are also skipped if the device asks for reduced motion. */
+  animationsEnabled: boolean
 }

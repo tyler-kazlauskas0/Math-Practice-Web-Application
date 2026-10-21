@@ -1,8 +1,8 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ComponentPropsWithRef } from 'react'
 
-export type ButtonVariant = 'primary' | 'secondary'
+export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger'
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends ComponentPropsWithRef<'button'> {
   variant?: ButtonVariant
 }
 

@@ -24,7 +24,7 @@
   color: var(--color-on-primary);
 }
 
-.button--primary:hover {
+.button--primary:hover:not(:disabled) {
   border-color: var(--color-primary-hover);
   background: var(--color-primary-hover);
 }
@@ -34,17 +34,50 @@
   color: var(--color-primary);
 }
 
-.button--secondary:hover {
+.button--secondary:hover:not(:disabled) {
   background: var(--color-primary-light);
 }
 
-.button:active {
+/* Outlined until chosen; a chosen button (aria-pressed) is filled in. */
+.button--success {
+  border-color: var(--color-success);
+  background: var(--color-surface);
+  color: var(--color-success);
+}
+
+.button--success:hover:not(:disabled),
+.button--danger:hover:not(:disabled) {
+  background: var(--color-primary-light);
+}
+
+.button--success[aria-pressed='true'] {
+  background: var(--color-success);
+  color: var(--color-on-primary);
+}
+
+.button--danger {
+  border-color: var(--color-error);
+  background: var(--color-surface);
+  color: var(--color-error);
+}
+
+.button--danger[aria-pressed='true'] {
+  background: var(--color-error);
+  color: var(--color-on-primary);
+}
+
+.button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
 .button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* A chosen button stays fully visible after the choice is locked in. */
+.button[aria-pressed='true']:disabled {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
