@@ -1,0 +1,71 @@
+# Checks every pull request and every change to main: lint, formatting, types, unit tests,
+# the production build and its size, then the real-browser tests in every browser.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npx tsc -b
+      - run: npm test
+      - run: npm run build
+      - run: npm run size
+
+  browsers:
+    needs: checks
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Chromium, Android phone, slow phone
+            install: chromium
+            projects: --project=chromium --project="android phone" --project="slow device"
+          - name: Firefox
+            install: firefox
+            projects: --project=firefox
+          - name: WebKit (Safari), iPhone, iPad
+            install: webkit
+            projects: --project=webkit --project=iphone --project=ipad
+          - name: Google Chrome and Microsoft Edge
+            install: chrome msedge
+            projects: --project="google chrome" --project="microsoft edge"
+            branded: 1
+    name: Browsers (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps ${{ matrix.install }}
+      - run: npx playwright test ${{ matrix.projects }}
+        env:
+          E2E_BRANDED_BROWSERS: ${{ matrix.branded }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-results (${{ matrix.name }})
+          path: test-results/
+          retention-days: 7

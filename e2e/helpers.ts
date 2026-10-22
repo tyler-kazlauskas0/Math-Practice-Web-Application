@@ -5,17 +5,17 @@ const axeSource = createRequire(import.meta.url).resolve('axe-core/axe.min.js')
 
 /** Every page, plus the data each needs to show everything (not just its empty state). */
 export const PAGES = [
-  ['home', '/'],
-  ['practice setup', '/practice/setup'],
-  ['statistics', '/statistics'],
-  ['mistakes', '/statistics/mistakes'],
-  ['settings', '/settings'],
-  ['not found', '/nope'],
+  ['home', './'],
+  ['practice setup', './practice/setup'],
+  ['statistics', './statistics'],
+  ['mistakes', './statistics/mistakes'],
+  ['settings', './settings'],
+  ['not found', './nope'],
 ] as const
 
 /** Saves a little practice history and one mistake, as if the app had been used. */
 export async function seedPracticeData(page: Page) {
-  await page.goto('/')
+  await page.goto('./')
   await page.evaluate(() => {
     const at = '2026-10-21T10:00:00.000Z'
     const question = {
@@ -115,4 +115,35 @@ export async function keyForCorrectAnswer(page: Page) {
     .getByRole('button', { name: /^Answer / })
     .evaluateAll((buttons) => buttons.map((b) => Number(b.lastChild?.textContent)))
   return String(values.indexOf(answer) + 1)
+}
+
+/** Every address in the app, with the main heading it should show when opened directly. */
+export const ROUTES_TO_VERIFY = [
+  ['./', /Welcome to Math Practice/],
+  ['./practice/setup', 'Practice Setup'],
+  // Without a session to run or show, these send the player somewhere sensible.
+  ['./practice/session', 'Practice Setup'],
+  ['./practice/summary', 'Practice Summary'],
+  ['./statistics', 'Statistics'],
+  ['./statistics/mistakes', 'Mistakes'],
+  ['./settings', 'Settings'],
+  ['./no-such-page', 'Page not found'],
+] as const
+
+/** Answers every question in a session of `length`, marking each one right. */
+export async function playSession(
+  page: Page,
+  length: '5 questions' | '10 questions' = '5 questions',
+) {
+  await page.goto('./practice/setup')
+  await page.getByRole('radio', { name: length }).check()
+  await page.getByRole('button', { name: 'Start Session' }).click()
+  const count = Number(length.split(' ')[0])
+  for (let i = 0; i < count; i++) {
+    await page.keyboard.press(await keyForCorrectAnswer(page))
+    await page.getByRole('button', { name: 'Flip Card' }).click()
+    await page.getByRole('button', { name: 'I Got It Right' }).click()
+    await page.getByRole('button', { name: /^(Next Question|Finish)$/ }).click()
+  }
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Great Practice!')
 }

@@ -1,0 +1,32 @@
+# After Netlify or Cloudflare Pages reports a successful deploy (a deploy preview or the live
+# site), checks it in real browsers: every address, saved progress, the console, privacy, and
+# the security headers. See docs/DEPLOYMENT.md.
+name: Verify deployment
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Test the deployed site
+        run: >
+          npx playwright test e2e/deployment.spec.ts e2e/privacy.spec.ts
+          --project=chromium --project=firefox --project=webkit
+          --project=iphone --project="android phone"
+        env:
+          E2E_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}

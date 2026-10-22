@@ -76,17 +76,17 @@ async function busyTime(page: Page, action: () => Promise<void>) {
 test('the first page is usable within 4 seconds on a slow phone', async ({ page }) => {
   await slowDown(page)
   const started = Date.now()
-  await page.goto('/')
+  await page.goto('./')
   await expect(page.getByRole('link', { name: 'Start Practice' })).toBeVisible()
 
   expect(Date.now() - started).toBeLessThan(4000)
 })
 
 test('answering stays responsive with a full history on a slow phone', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('./')
   await saveHistory(page, 5000)
   await slowDown(page)
-  await page.goto('/practice/setup')
+  await page.goto('./practice/setup')
   await page.getByRole('button', { name: 'Start Session' }).click()
 
   // The first answer also reads the saved history for the first time (and trims it to the

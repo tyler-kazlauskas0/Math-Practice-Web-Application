@@ -13,9 +13,12 @@ import { migrateStorage } from './services/schema'
 migrateStorage()
 checkAndRepairStoredData()
 
+// Where the app lives on the site (the root, unless Vite's `base` says otherwise).
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App router={createBrowserRouter(appRoutes)} />
+    <App router={createBrowserRouter(appRoutes, { basename })} />
   </StrictMode>,
 )
 
