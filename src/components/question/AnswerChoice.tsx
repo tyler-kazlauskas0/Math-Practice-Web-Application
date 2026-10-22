@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 interface AnswerChoiceProps {
   value: number
   /** The number key (1–4) that also chooses this answer. */
@@ -37,4 +39,5 @@ function AnswerChoice({ value, shortcut, isSelected, isLocked, onSelect }: Answe
   )
 }
 
-export default AnswerChoice
+// Memoized: choosing an answer re-renders only the buttons whose selection changed.
+export default memo(AnswerChoice)

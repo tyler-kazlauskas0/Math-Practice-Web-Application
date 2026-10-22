@@ -7,6 +7,11 @@ import { defineConfig, devices } from '@playwright/test'
  * First time: `npx playwright install chromium`. To use a Chromium that's already installed
  * instead, set `PLAYWRIGHT_CHROMIUM_PATH` to its executable.
  */
+const chromium = {
+  ...devices['Desktop Chrome'],
+  launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined },
+}
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -20,10 +25,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined },
-      },
+      testIgnore: /slowDevice/,
+      use: chromium,
+    },
+    {
+      // Timing tests run on their own after the others, one at a time, so other tests running
+      // in parallel can't slow them down.
+      name: 'slow device',
+      testMatch: /slowDevice/,
+      dependencies: ['chromium'],
+      fullyParallel: false,
+      use: chromium,
     },
   ],
   webServer: {

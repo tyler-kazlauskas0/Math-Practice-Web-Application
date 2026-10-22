@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 interface SessionProgressProps {
   answered: number
   /** `null` for non-stop practice, which shows a running count instead of a bar. */
@@ -38,4 +40,4 @@ function SessionProgress({ answered, total, correct }: SessionProgressProps) {
   )
 }
 
-export default SessionProgress
+export default memo(SessionProgress)

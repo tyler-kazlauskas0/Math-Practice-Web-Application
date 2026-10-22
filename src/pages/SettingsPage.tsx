@@ -11,7 +11,8 @@ import SettingToggle from '../components/settings/SettingToggle'
 import { DATA_CLEARED_REASON, ROUTES } from '../data/routes'
 import { useMistakePatterns } from '../hooks/useMistakePatterns'
 import { useSettings } from '../hooks/useSettings'
-import { clearAllAppData } from '../services/storage'
+import { clearAllAppData, getStorageUsage, TYPICAL_STORAGE_LIMIT } from '../services/storage'
+import { formatShare, formatStorageSize } from '../utils/format'
 import type { MathOperation } from '../types/question'
 import { MASTERY_THRESHOLD_OPTIONS } from '../utils/mistakePatterns'
 import './SettingsPage.css'
@@ -24,6 +25,11 @@ function SettingsPage() {
   // briefly differ from the saved one.
   const [operations, setOperations] = useState<MathOperation[]>(settings.enabledOperations)
   const [lastChange, setLastChange] = useState(0)
+  // Measured when the page opens. (Changing a setting barely changes it.)
+  const [storageUsed] = useState(() => getStorageUsage().total)
+  const storageNote = `Saved on this device: ${formatStorageSize(storageUsed)} (${formatShare(
+    storageUsed / TYPICAL_STORAGE_LIMIT,
+  )} of the space most browsers allow).`
 
   function save(changes: Parameters<typeof updateSettings>[0]) {
     updateSettings(changes)
@@ -130,6 +136,7 @@ function SettingsPage() {
 
         <section className="settings-section" aria-labelledby="data-heading">
           <h2 id="data-heading">Your data</h2>
+          <p className="settings-section__note">{storageNote}</p>
           <p className="settings-section__note">
             To delete only your practice history, use Reset Statistics on the Statistics page.
           </p>

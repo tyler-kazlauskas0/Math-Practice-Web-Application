@@ -4,7 +4,7 @@ import { createBrowserRouter } from 'react-router'
 import './styles/global.css'
 import './styles/buttons.css'
 import App from './App.tsx'
-import { appRoutes } from './routes.tsx'
+import { appRoutes, preloadPages } from './routes.tsx'
 import { checkAndRepairStoredData } from './services/dataHealth'
 import { migrateStorage } from './services/schema'
 
@@ -18,3 +18,9 @@ createRoot(document.getElementById('root')!).render(
     <App router={createBrowserRouter(appRoutes)} />
   </StrictMode>,
 )
+
+// Once the first page is showing, download the other pages in the background, so they open
+// instantly. If that fails (e.g. offline), each page tries again when it's opened.
+const whenIdle =
+  window.requestIdleCallback ?? ((callback: () => void) => setTimeout(callback, 1000))
+whenIdle(() => preloadPages().catch(() => {}))

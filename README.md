@@ -18,9 +18,11 @@ npm test              # run the unit, component, and integration tests once (Vit
 npm run test:watch    # re-run tests on file changes
 npm run test:coverage # run the tests with a coverage report
 npm run test:e2e      # real-browser tests: zoom, contrast, focus, motion (Playwright)
+npm run size          # after a build: what the first page load downloads (with a budget)
 ```
 
-See [docs/TESTING.md](docs/TESTING.md) for what is tested where, and the accessibility review.
+See [docs/TESTING.md](docs/TESTING.md) for what is tested where, and the accessibility review,
+and [docs/PERFORMANCE.md](docs/PERFORMANCE.md) for performance measurements.
 
 ## Project structure
 
@@ -50,7 +52,8 @@ src/
   routes.tsx   Every page's address (a React Router data router, needed for leave warnings)
   main.tsx     Entry point
 e2e/           Real-browser tests (Playwright)
-docs/          Testing guide and accessibility review
+scripts/       Build tools (bundle size report)
+docs/          Testing, accessibility, and performance notes
 ```
 
 ## Saved data
@@ -63,8 +66,8 @@ Nothing is sent to a server.
 | `math-practice:schema-version`   | Version of the saved data format (see `src/services/schema.ts`)               |
 | `math-practice:settings`         | Settings, including the default practice choices                              |
 | `math-practice:sessions`         | The newest 100 practice sessions (without their answers)                      |
-| `math-practice:attempts`         | Every answer from those sessions, up to 5,000                                 |
-| `math-practice:history-archive`  | Totals (overall, per operation, per level) for answers no longer kept in full |
+| `math-practice:attempts`         | The newest 1,000 answers from those sessions                                  |
+| `math-practice:history-archive`  | Totals for answers no longer kept in full: counts, best streak, review totals |
 | `math-practice:mistake-patterns` | One record per math fact answered wrong (up to 500), for mistake practice     |
 | `math-practice:active-session`   | The session in progress (question, chosen answer), so a refresh can resume it |
 

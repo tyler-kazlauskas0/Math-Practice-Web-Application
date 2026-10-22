@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   clearAllAppData,
+  getStorageUsage,
   isQuotaExceededError,
   isStorageAvailable,
   readJson,
@@ -96,5 +97,28 @@ describe('storage service', () => {
 
     expect(localStorage.length).toBe(1)
     expect(localStorage.getItem('other-app')).toBe('keep me')
+  })
+})
+
+describe('getStorageUsage', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('counts the characters of each of the app’s keys and values, and nothing else', () => {
+    writeText('settings', '{"a":1}')
+    writeText('attempts', '[]')
+    localStorage.setItem('other-app', 'x'.repeat(1000))
+
+    expect(getStorageUsage()).toEqual({
+      total: 'math-practice:settings'.length + 7 + 'math-practice:attempts'.length + 2,
+      byKey: {
+        settings: 'math-practice:settings'.length + 7,
+        attempts: 'math-practice:attempts'.length + 2,
+      },
+    })
+  })
+
+  it('reports nothing when storage is unavailable', () => {
+    blockStorage()
+    expect(getStorageUsage()).toEqual({ total: 0, byKey: {} })
   })
 })

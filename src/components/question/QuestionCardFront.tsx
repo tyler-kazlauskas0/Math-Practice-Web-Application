@@ -1,4 +1,4 @@
-import { useEffect, type Ref } from 'react'
+import { memo, useEffect, type Ref } from 'react'
 import type { Question } from '../../types/question'
 import Button from '../ui/Button'
 import { speakQuestion } from '../../utils/questions/spokenText'
@@ -95,4 +95,5 @@ function QuestionCardFront({
   )
 }
 
-export default QuestionCardFront
+// Memoized: after flipping, the hidden front doesn't need to re-render as the back changes.
+export default memo(QuestionCardFront)

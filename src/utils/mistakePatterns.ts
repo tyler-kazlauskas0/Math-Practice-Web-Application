@@ -20,6 +20,10 @@ export const isMasteryThreshold = (value: unknown): value is number =>
 /** Mastered patterns are left out of mistake review until the fact is missed again. */
 export const isMastered = (pattern: MistakePattern) => pattern.masteredAt !== null
 
+/** Whether an answer was to a question related to a saved mistake. */
+export const isMistakeReviewAttempt = (attempt: PracticeAttempt) =>
+  attempt.question.source === 'mistake-review'
+
 /** Patterns that still need review. */
 export const activePatterns = (patterns: MistakePattern[]) =>
   patterns.filter((pattern) => !isMastered(pattern))

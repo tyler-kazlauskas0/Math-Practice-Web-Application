@@ -141,6 +141,38 @@ export function clearAllAppData(): void {
   }
 }
 
+/**
+ * About how much one site may save in most browsers, in characters. Browsers count the
+ * characters of every key and value; the exact limit varies.
+ */
+export const TYPICAL_STORAGE_LIMIT = 5_000_000
+
+export interface StorageUsage {
+  /** Characters used by all of this app's keys and values. */
+  total: number
+  /** Characters used per key (without the `math-practice:` prefix). */
+  byKey: Record<string, number>
+}
+
+/** How much this app has saved, counted the way browsers count it against their limit. */
+export function getStorageUsage(): StorageUsage {
+  const usage: StorageUsage = { total: 0, byKey: {} }
+  const storage = getStorage()
+  if (!storage) return usage
+  try {
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i)
+      if (key === null || !key.startsWith(STORAGE_PREFIX)) continue
+      const size = key.length + (storage.getItem(key)?.length ?? 0)
+      usage.byKey[key.slice(STORAGE_PREFIX.length)] = size
+      usage.total += size
+    }
+  } catch {
+    // Storage became unavailable: report what was counted.
+  }
+  return usage
+}
+
 /** Removes one of this app's keys. Other data is never touched. */
 export function removeItem(key: string): void {
   try {
