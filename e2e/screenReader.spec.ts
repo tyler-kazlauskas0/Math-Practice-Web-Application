@@ -8,7 +8,7 @@ import { correctAnswer, keyForCorrectAnswer } from './helpers.ts'
  */
 
 test('the question card makes sense without seeing it', async ({ page }) => {
-  await page.goto('/practice/setup')
+  await page.goto('./practice/setup')
   await page.getByRole('checkbox', { name: 'Addition' }).uncheck()
   await page.getByRole('checkbox', { name: 'Multiplication' }).check()
   await page.getByRole('radio', { name: '5 questions' }).check()
@@ -40,7 +40,13 @@ test('the question card makes sense without seeing it', async ({ page }) => {
 })
 
 test('every page has one main heading, a main landmark, and a labelled menu', async ({ page }) => {
-  for (const path of ['/', '/practice/setup', '/statistics', '/statistics/mistakes', '/settings']) {
+  for (const path of [
+    './',
+    './practice/setup',
+    './statistics',
+    './statistics/mistakes',
+    './settings',
+  ]) {
     await page.goto(path)
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1)
     await expect(page.getByRole('main')).toHaveCount(1)
@@ -51,7 +57,7 @@ test('every page has one main heading, a main landmark, and a labelled menu', as
 })
 
 test('the accessibility tree of the setup page reads in a sensible order', async ({ page }) => {
-  await page.goto('/practice/setup')
+  await page.goto('./practice/setup')
 
   await expect(page.getByRole('main')).toMatchAriaSnapshot(`
     - heading "Practice Setup" [level=1]

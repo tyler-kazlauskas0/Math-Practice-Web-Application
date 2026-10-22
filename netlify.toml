@@ -1,0 +1,9 @@
+# Netlify settings (see docs/DEPLOYMENT.md). Addresses and security headers are set by
+# public/_redirects and the generated dist/_headers, which Cloudflare Pages reads too.
+[build]
+  # Lint and test before building, so a broken change never reaches the live site.
+  command = "npm run lint && npm test && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

@@ -11,7 +11,7 @@ const ZOOM_LEVELS = [
 ]
 
 async function startSession(page: Page) {
-  await page.goto('/practice/setup')
+  await page.goto('./practice/setup')
   await page.getByRole('button', { name: 'Start Session' }).click()
 }
 

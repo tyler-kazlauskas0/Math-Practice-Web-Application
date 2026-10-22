@@ -1,6 +1,14 @@
 import { expect, test, type Page } from '@playwright/test'
 import { keyForCorrectAnswer } from './helpers.ts'
 
+// Safari only moves focus to links and buttons with Tab when "Press Tab to highlight each item"
+// is turned on in its settings, so WebKit can't follow these steps as written; and phones and
+// tablets have no keyboard. The keyboard path is checked in Chromium and Firefox.
+test.skip(
+  ({ browserName, isMobile }) => browserName === 'webkit' || isMobile,
+  'Tab doesn’t reach links and buttons in Safari by default; no keyboard on phones and tablets',
+)
+
 /** Whether the focused control shows a clear focus ring (at least 2px), so sighted keyboard users can follow along. */
 const focusIsVisible = (page: Page) =>
   page.evaluate(() => {
@@ -30,7 +38,7 @@ async function tabTo(
 test('a whole session works with the keyboard alone, with focus always visible', async ({
   page,
 }) => {
-  await page.goto('/')
+  await page.goto('./')
 
   await tabTo(page, 'link', 'Start Practice')
   await page.keyboard.press('Enter')
@@ -61,7 +69,7 @@ test('a whole session works with the keyboard alone, with focus always visible',
 })
 
 test('dialogs keep the keyboard user in control', async ({ page }) => {
-  await page.goto('/practice/setup')
+  await page.goto('./practice/setup')
   await page.getByRole('button', { name: 'Start Session' }).click()
   await page.keyboard.press('1')
   await page.getByRole('button', { name: 'Flip Card' }).click()

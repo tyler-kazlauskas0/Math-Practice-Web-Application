@@ -5,15 +5,16 @@ accessibility review.
 
 ## Running the tests
 
-| Command                 | What it runs                                                            |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `npm test`              | Unit, component, and integration tests (Vitest + React Testing Library) |
-| `npm run test:watch`    | The same, re-running on every change                                    |
-| `npm run test:coverage` | The same, with a coverage report (also saved as HTML in `coverage/`)    |
-| `npm run test:e2e`      | Real-browser tests (Playwright + Chromium) against the production build |
+| Command                 | What it runs                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------ |
+| `npm test`              | Unit, component, and integration tests (Vitest + React Testing Library)        |
+| `npm run test:watch`    | The same, re-running on every change                                           |
+| `npm run test:coverage` | The same, with a coverage report (also saved as HTML in `coverage/`)           |
+| `npm run test:e2e`      | Real-browser tests (Playwright) in every browser, against the production build |
 
-The real-browser tests need Chromium once: `npx playwright install chromium`. To use a
-Chromium that is already installed instead, set `PLAYWRIGHT_CHROMIUM_PATH` to its executable.
+The real-browser tests need the browsers once: `npx playwright install`. Pick browsers with
+`--project`, e.g. `npx playwright test --project=firefox`. To use a Chromium that is already
+installed, set `PLAYWRIGHT_CHROMIUM_PATH` to its executable.
 
 Coverage of `src/` (excluding tests): about 98% of lines and 95% of branches.
 
@@ -37,6 +38,43 @@ Coverage of `src/` (excluding tests): about 98% of lines and 95% of branches.
   browser tests, so they measure fairly.
 
 See [PERFORMANCE.md](PERFORMANCE.md) for the measurements.
+
+## Browsers and devices
+
+Every browser test runs in each of these (CI runs them all on every pull request; see
+`.github/workflows/ci.yml`):
+
+| Project                           | What it stands for                                      |
+| --------------------------------- | ------------------------------------------------------- |
+| `chromium`                        | Chrome and Edge (the same engine)                       |
+| `google chrome`, `microsoft edge` | The real branded browsers (`E2E_BRANDED_BROWSERS=1`)    |
+| `firefox`                         | Firefox                                                 |
+| `webkit`                          | Safari on a Mac (Safari's engine)                       |
+| `iphone`                          | Safari on an iPhone 14 (WebKit, touch, phone screen)    |
+| `ipad`                            | Safari on an iPad Pro 11 (WebKit, touch, tablet screen) |
+| `android phone`                   | Chrome on a Pixel 7 (touch, phone screen)               |
+| `slow device`                     | A slow phone: 6× slower CPU and slow 4G (Chromium only) |
+
+The keyboard-only tests are skipped:
+
+- **On WebKit:** Safari doesn't move focus to links and buttons with Tab unless "Press Tab to
+  highlight each item" is turned on, so it's checked by hand below.
+- **On phones and tablets:** they have no keyboard.
+
+### Real devices (before each release)
+
+Emulators don't catch everything (e.g. real touch, iOS Safari's address bar, VoiceOver). On the
+deploy preview, on an iPhone or iPad and an Android phone or tablet:
+
+1. Home → Start Practice → answer a 5-question session by tapping. Each answer, flip, and Next
+   responds straight away.
+2. Turn the device sideways mid-session: the card still fits and nothing is cut off.
+3. Close the tab, open the site again: Statistics shows the session.
+4. Refresh mid-session: it continues ("Welcome back!").
+5. Settings → turn off Card flip animation; turn on the device's Reduce Motion: no movement.
+6. Safari on a Mac with "Press Tab to highlight each item" on: a whole session by keyboard.
+
+Record the device, browser version, date and any problems here.
 
 ## Requirement → test map
 

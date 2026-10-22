@@ -78,6 +78,16 @@ describe('SettingsPage', () => {
 })
 
 describe('saved data on this device', () => {
+  it('tells parents that nothing leaves the device, and that clearing browser data removes progress', () => {
+    renderApp()
+    const section = screen.getByRole('region', { name: 'Your data' })
+
+    expect(section).toHaveTextContent(/saved only in this browser, on this device/)
+    expect(section).toHaveTextContent(/no accounts, no ads, and no tracking/)
+    expect(section).toHaveTextContent(/Clearing this browser’s history or site data/)
+    expect(section).toHaveTextContent(/starts over from the beginning/)
+  })
+
   it('says how much is saved, and how much of the browser’s space that is', () => {
     localStorage.setItem('math-practice:attempts', 'x'.repeat(149_970))
     renderApp()

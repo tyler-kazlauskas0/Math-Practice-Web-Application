@@ -136,6 +136,15 @@ function SettingsPage() {
 
         <section className="settings-section" aria-labelledby="data-heading">
           <h2 id="data-heading">Your data</h2>
+          <p className="settings-section__note">
+            Everything you do here is saved only in this browser, on this device. Nothing is sent
+            anywhere: there are no accounts, no ads, and no tracking.
+          </p>
+          <p className="settings-section__note">
+            <strong>Your progress lives in this browser.</strong> Clearing this browser’s history or
+            site data, practicing in a private window, or switching to another browser or device
+            starts over from the beginning.
+          </p>
           <p className="settings-section__note">{storageNote}</p>
           <p className="settings-section__note">
             To delete only your practice history, use Reset Statistics on the Statistics page.

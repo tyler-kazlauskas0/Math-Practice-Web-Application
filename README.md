@@ -17,9 +17,14 @@ npm run format:check  # check formatting without changing files
 npm test              # run the unit, component, and integration tests once (Vitest)
 npm run test:watch    # re-run tests on file changes
 npm run test:coverage # run the tests with a coverage report
-npm run test:e2e      # real-browser tests: zoom, contrast, focus, motion (Playwright)
+npm run test:e2e      # real-browser tests in every browser (Playwright; see docs/TESTING.md)
 npm run size          # after a build: what the first page load downloads (with a budget)
+npm run preview:host  # after a build: serve dist/ the way Netlify does (http://localhost:4173)
 ```
+
+The app is hosted on Netlify, which deploys every change merged into `main` (see
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)). It collects nothing and works entirely in the
+browser (see [docs/PRIVACY.md](docs/PRIVACY.md)).
 
 See [docs/TESTING.md](docs/TESTING.md) for what is tested where, and the accessibility review,
 and [docs/PERFORMANCE.md](docs/PERFORMANCE.md) for performance measurements.
@@ -52,8 +57,10 @@ src/
   routes.tsx   Every page's address (a React Router data router, needed for leave warnings)
   main.tsx     Entry point
 e2e/           Real-browser tests (Playwright)
-scripts/       Build tools (bundle size report)
-docs/          Testing, accessibility, and performance notes
+scripts/       Build tools (bundle size report, local copy of the host)
+docs/          Testing, accessibility, performance, privacy, and deployment notes
+.github/       CI (every pull request) and checks of each deployment
+netlify.toml   Netlify's build settings
 ```
 
 ## Saved data
