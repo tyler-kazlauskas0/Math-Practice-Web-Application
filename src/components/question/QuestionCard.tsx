@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Question } from '../../types/question'
 import LiveAnnouncement from '../ui/LiveAnnouncement'
 import QuestionCardBack from './QuestionCardBack'
@@ -100,6 +100,20 @@ function QuestionCard({
     if (markedCorrect !== null) nextButtonRef.current?.focus()
   }, [markedCorrect])
 
+  // Stable between renders, so the front of the card (memoized) only re-renders when what it
+  // shows changes, and its number-key listener isn't removed and re-added every time.
+  const selectAnswer = useCallback(
+    (answer: number) => {
+      if (!isCardFlipped) setSelectedAnswer(answer)
+    },
+    [isCardFlipped],
+  )
+  const flip = useCallback(() => {
+    if (selectedAnswer === null) return
+    setTimeTakenMs(Date.now() - shownAtRef.current)
+    setIsCardFlipped(true)
+  }, [selectedAnswer])
+
   const classes = [
     'question-card',
     isCardFlipped && 'question-card--flipped',
@@ -132,14 +146,8 @@ function QuestionCard({
             totalQuestions={totalQuestions}
             selectedAnswer={selectedAnswer}
             isLocked={isCardFlipped}
-            onSelect={(answer) => {
-              if (!isCardFlipped) setSelectedAnswer(answer)
-            }}
-            onFlip={() => {
-              if (selectedAnswer === null) return
-              setTimeTakenMs(Date.now() - shownAtRef.current)
-              setIsCardFlipped(true)
-            }}
+            onSelect={selectAnswer}
+            onFlip={flip}
             headingRef={frontHeadingRef}
           />
         </div>

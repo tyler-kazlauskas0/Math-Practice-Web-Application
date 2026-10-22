@@ -41,23 +41,45 @@ export function tallyAttempts(
   }
 }
 
-/** The most answers marked right in a row, in the order they were answered. */
-export function bestStreak(attempts: PracticeAttempt[]): number {
-  const inOrder = [...attempts].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt))
-  let best = 0
-  let current = 0
-  for (const attempt of inOrder) {
-    current = attempt.isCorrect ? current + 1 : 0
-    best = Math.max(best, current)
-  }
-  return best
+/** Runs of answers marked right: the longest, and the one still going at the end. */
+export interface Streaks {
+  best: number
+  trailing: number
 }
 
-/** Earlier results that are only kept as totals (see `HistoryArchive`). */
+/**
+ * The runs of right answers in `attempts`, in the order they were answered. Pass the runs of
+ * earlier answers to carry on from them, so a run that started earlier is counted whole.
+ */
+export function streaks(
+  attempts: PracticeAttempt[],
+  earlier: Streaks = { best: 0, trailing: 0 },
+): Streaks {
+  const inOrder = [...attempts].sort((a, b) => a.answeredAt.localeCompare(b.answeredAt))
+  let { best, trailing } = earlier
+  for (const attempt of inOrder) {
+    trailing = attempt.isCorrect ? trailing + 1 : 0
+    best = Math.max(best, trailing)
+  }
+  return { best, trailing }
+}
+
+/** The most answers marked right in a row, in the order they were answered. */
+export const bestStreak = (attempts: PracticeAttempt[], earlier?: Streaks) =>
+  streaks(attempts, earlier).best
+
+/**
+ * Earlier results that are only kept as totals (see `HistoryArchive`): everything the
+ * Statistics page shows, so nothing changes when answers stop being kept in full.
+ */
 export interface ArchivedTotals extends Tally {
   sessionCount: number
   byOperation: Record<MathOperation, Tally>
   byDifficulty: Record<DifficultyLevel, Tally>
+  /** Runs of right answers among the archived answers, to continue the best streak from. */
+  streaks: Streaks
+  /** Mistake-review answers among them. */
+  review: Tally
 }
 
 /** Everything the Statistics page shows, from saved attempts plus archived totals. */
@@ -95,7 +117,7 @@ export function calculateStatistics(
   return {
     ...tallyAttempts(attempts, archive),
     totalSessions: sessionCount + (archive?.sessionCount ?? 0),
-    bestStreak: bestStreak(attempts),
+    bestStreak: bestStreak(attempts, archive?.streaks),
     byOperation,
     byDifficulty,
   }

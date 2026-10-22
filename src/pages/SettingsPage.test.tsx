@@ -77,6 +77,17 @@ describe('SettingsPage', () => {
   })
 })
 
+describe('saved data on this device', () => {
+  it('says how much is saved, and how much of the browser’s space that is', () => {
+    localStorage.setItem('math-practice:attempts', 'x'.repeat(149_970))
+    renderApp()
+
+    expect(
+      screen.getByText(/^Saved on this device: about 150 KB \(3% of the space/),
+    ).toBeInTheDocument()
+  })
+})
+
 describe('Clear All Application Data', () => {
   async function openConfirmation() {
     const result = renderApp()

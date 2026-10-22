@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import PageContainer from '../components/layout/PageContainer'
 import '../components/statistics/statistics.css'
 import Button from '../components/ui/Button'
@@ -55,8 +55,14 @@ function MistakesPage() {
   const { masteryThreshold } = useSettings().settings
   const [view, setView] = useState<View>('active')
 
-  const active = sortByIncorrectCount(activePatterns(patterns))
-  const mastered = sortByIncorrectCount(patterns.filter(isMastered))
+  // Sorted once per change to the mistakes (up to 500), not again when switching views.
+  const { active, mastered } = useMemo(
+    () => ({
+      active: sortByIncorrectCount(activePatterns(patterns)),
+      mastered: sortByIncorrectCount(patterns.filter(isMastered)),
+    }),
+    [patterns],
+  )
   const shown = view === 'active' ? active : mastered
 
   return (

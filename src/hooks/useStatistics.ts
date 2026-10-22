@@ -16,10 +16,11 @@ export const RECENT_SESSION_COUNT = 10
 
 function loadStatistics(patterns: MistakePattern[]) {
   const attempts = loadAttempts()
+  const archive = loadArchive()
   return {
-    statistics: calculateStatistics(attempts, countStoredSessions(), loadArchive()),
+    statistics: calculateStatistics(attempts, countStoredSessions(), archive),
     recentSessions: loadRecentSessions(RECENT_SESSION_COUNT),
-    mistakeSummary: summarizeMistakes(patterns, attempts),
+    mistakeSummary: summarizeMistakes(patterns, attempts, archive.review),
   }
 }
 

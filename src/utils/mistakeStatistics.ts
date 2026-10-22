@@ -3,7 +3,8 @@ import type { MistakePattern } from '../types/mistake'
 import type { MathOperation } from '../types/question'
 import type { PracticeAttempt } from '../types/session'
 import type { OperationStatistics } from '../types/statistics'
-import { isMastered } from './mistakePatterns'
+import type { Tally } from './statistics'
+import { isMastered, isMistakeReviewAttempt } from './mistakePatterns'
 import { formatQuestion } from './questions/formatQuestion'
 
 export interface MistakeSummary {
@@ -20,14 +21,16 @@ export interface MistakeSummary {
 export function summarizeMistakes(
   patterns: MistakePattern[],
   attempts: PracticeAttempt[],
+  archivedReview: Tally = { totalAttempts: 0, correctAttempts: 0 },
 ): MistakeSummary {
-  const review = attempts.filter((attempt) => attempt.question.source === 'mistake-review')
+  const review = attempts.filter(isMistakeReviewAttempt)
   const masteredCount = patterns.filter(isMastered).length
   return {
     activeCount: patterns.length - masteredCount,
     masteredCount,
-    reviewQuestions: review.length,
-    reviewCorrect: review.filter((attempt) => attempt.isCorrect).length,
+    reviewQuestions: review.length + archivedReview.totalAttempts,
+    reviewCorrect:
+      review.filter((attempt) => attempt.isCorrect).length + archivedReview.correctAttempts,
   }
 }
 

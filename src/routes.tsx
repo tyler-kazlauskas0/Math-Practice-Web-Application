@@ -3,13 +3,21 @@ import AppLayout from './components/layout/AppLayout'
 import { ROUTES } from './data/routes'
 import ErrorPage from './pages/ErrorPage'
 import HomePage from './pages/HomePage'
-import MistakesPage from './pages/MistakesPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PracticeSessionPage from './pages/PracticeSessionPage'
 import PracticeSetupPage from './pages/PracticeSetupPage'
 import PracticeSummaryPage from './pages/PracticeSummaryPage'
-import SettingsPage from './pages/SettingsPage'
-import StatisticsPage from './pages/StatisticsPage'
+import { lazyPage } from './utils/lazyPage'
+
+// Pages most players don't open on every visit are downloaded separately, when needed.
+const StatisticsPage = lazyPage(() => import('./pages/StatisticsPage'))
+const MistakesPage = lazyPage(() => import('./pages/MistakesPage'))
+const SettingsPage = lazyPage(() => import('./pages/SettingsPage'))
+
+/** Downloads every separately loaded page now, e.g. in the background after the app starts. */
+export function preloadPages(): Promise<void[]> {
+  return Promise.all([StatisticsPage, MistakesPage, SettingsPage].map((page) => page.preload()))
+}
 
 /**
  * Every page in the app. Used with `createBrowserRouter` in the app and `createMemoryRouter`

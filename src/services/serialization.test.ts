@@ -11,6 +11,7 @@ import {
   isHistoryArchive,
   isStoredAttempt,
   isStoredSession,
+  loadArchive,
   loadAttempts,
   loadRecentSessions,
   saveAttempt,
@@ -44,6 +45,8 @@ const archive: HistoryArchive = {
   ...tally,
   byOperation: { addition: tally, subtraction: tally, multiplication: tally, division: tally },
   byDifficulty: { beginner: tally, easy: tally, intermediate: tally, advanced: tally },
+  streaks: { best: 7, trailing: 2 },
+  review: { totalAttempts: 4, correctAttempts: 3 },
 }
 const pattern = makePattern(7, 'multiplication', 8, {
   similarCorrectCount: 2,
@@ -51,14 +54,17 @@ const pattern = makePattern(7, 'multiplication', 8, {
 })
 
 /** The record with one field removed, and with that field set to the wrong kind of value. */
+/** Fields that older saved data may not have, so a record without them is still accepted. */
+const OPTIONAL_FIELDS = ['streaks', 'review']
+
 function brokenCopies(record: object): [string, unknown][] {
   return Object.keys(record).flatMap((field) => {
     const missing: Record<string, unknown> = { ...record }
     delete missing[field]
     return [
-      [`without ${field}`, missing],
+      ...(OPTIONAL_FIELDS.includes(field) ? [] : [[`without ${field}`, missing]]),
       [`with the wrong type of ${field}`, { ...record, [field]: { wrong: true } }],
-    ] satisfies [string, unknown][]
+    ] as [string, unknown][]
   })
 }
 
@@ -132,6 +138,20 @@ describe.each([
 })
 
 describe('validating other saved data', () => {
+  it('accepts older statistics saved before streaks and review totals were kept, as zero', () => {
+    const older: Partial<HistoryArchive> = { ...archive }
+    delete older.streaks
+    delete older.review
+    localStorage.setItem('math-practice:history-archive', JSON.stringify(older))
+
+    expect(isHistoryArchive(older)).toBe(true)
+    expect(loadArchive()).toEqual({
+      ...older,
+      streaks: { best: 0, trailing: 0 },
+      review: { totalAttempts: 0, correctAttempts: 0 },
+    })
+  })
+
   it('rejects impossible counts and dates', () => {
     expect(isStoredSession({ ...session, correctAttempts: 3 })).toBe(false)
     expect(isStoredSession({ ...session, totalAttempts: -1 })).toBe(false)

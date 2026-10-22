@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useRef } from 'react'
 import { saveAttempt, saveSession, toStoredSession } from '../services/practiceHistory'
 import type { MistakePattern } from '../types/mistake'
 import type { Question } from '../types/question'
@@ -96,12 +96,22 @@ export function usePracticeSession(
   // Save each answer as soon as it's recorded, and keep the session record up to date, so
   // nothing is lost if the browser is closed mid-session. Sessions with no answers aren't saved.
   // Each new answer also updates the mistake patterns, once (this effect can run more than once).
+  // Moving to the next question changes nothing that is saved, so it's skipped: with a long
+  // history, each save reads and rewrites thousands of answers.
+  const lastSaved = useRef<Pick<PracticeSessionState, 'attempts' | 'completedAt'> | null>(null)
   useEffect(() => {
     const latest = state.attempts.at(-1)
     if (!latest) return
+    if (
+      lastSaved.current?.attempts === state.attempts &&
+      lastSaved.current.completedAt === state.completedAt
+    ) {
+      return
+    }
     const saved = saveAttempt({ ...latest, sessionId: state.id })
     if (saved.isNew) recordAttempt(latest)
     saveSession(toStoredSession(state))
+    lastSaved.current = { attempts: state.attempts, completedAt: state.completedAt }
   }, [state, recordAttempt])
 
   return {

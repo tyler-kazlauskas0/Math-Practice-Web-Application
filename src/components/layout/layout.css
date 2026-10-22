@@ -141,3 +141,10 @@
   min-width: 0;
   margin: 0;
 }
+
+/* Shown for a moment while a page that is downloaded separately arrives. */
+.page-loading {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}

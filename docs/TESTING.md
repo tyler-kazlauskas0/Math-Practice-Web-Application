@@ -28,6 +28,16 @@ Coverage of `src/` (excluding tests): about 98% of lines and 95% of branches.
 - **Shared helpers** are in `src/test/`. For example, `practice.tsx` opens the app and answers
   questions.
 
+### Performance tests
+
+- **`src/services/largeHistory.test.ts`:** thousands of answers. Checks the limits, that
+  totals are exact after archiving, storage size, and how much each answer rewrites.
+- **`src/pages/rendering.test.tsx`:** no needless re-renders, saves or question generation.
+- **`e2e/slowDevice.spec.ts`:** a slow phone. These tests run on their own, after the other
+  browser tests, so they measure fairly.
+
+See [PERFORMANCE.md](PERFORMANCE.md) for the measurements.
+
 ## Requirement → test map
 
 ### 79. Unit tests

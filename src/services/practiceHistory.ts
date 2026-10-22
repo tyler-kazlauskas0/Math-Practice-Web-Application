@@ -2,10 +2,11 @@ import type { PracticeAttempt, PracticeConfig, PracticeSessionState } from '../t
 import { isPracticeConfig } from '../utils/practiceConfig'
 import { isReviewSession } from '../utils/practiceSession'
 import { isValidQuestion } from '../utils/questions/validateQuestion'
-import type { ArchivedTotals, Tally } from '../utils/statistics'
+import { isMistakeReviewAttempt } from '../utils/mistakePatterns'
+import { streaks, type ArchivedTotals, type Tally } from '../utils/statistics'
 import { difficultyKeys, emptyTallies, operationKeys } from './migrations'
 import { migrateStorage } from './schema'
-import { readJson, removeItem, writeJson, type WriteResult } from './storage'
+import { readJson, readText, removeItem, writeJson, writeText, type WriteResult } from './storage'
 
 export const SESSIONS_KEY = 'sessions'
 export const ATTEMPTS_KEY = 'attempts'
@@ -13,8 +14,12 @@ export const ARCHIVE_KEY = 'history-archive'
 
 /** Sessions kept in full. Older ones are folded into the archive totals. */
 export const MAX_STORED_SESSIONS = 100
-/** Attempts kept in full. A safety limit in case of very long non-stop sessions. */
-export const MAX_STORED_ATTEMPTS = 5000
+/**
+ * Answers kept in full. Older ones are folded into the archive totals, which keep everything
+ * the Statistics page shows. Every answer rewrites this list, so it's kept short enough to save
+ * quickly on a slow phone (see docs/PERFORMANCE.md).
+ */
+export const MAX_STORED_ATTEMPTS = 1000
 
 /** One saved practice session, without its attempts (those are saved separately). */
 export interface StoredSession {
@@ -39,12 +44,16 @@ export interface StoredAttempt extends PracticeAttempt {
  */
 export type HistoryArchive = ArchivedTotals
 
+const NO_TALLY: Tally = { totalAttempts: 0, correctAttempts: 0 }
+
 const emptyArchive = (): HistoryArchive => ({
   sessionCount: 0,
   totalAttempts: 0,
   correctAttempts: 0,
   byOperation: emptyTallies(operationKeys),
   byDifficulty: emptyTallies(difficultyKeys),
+  streaks: { best: 0, trailing: 0 },
+  review: NO_TALLY,
 })
 
 const isCount = (value: unknown): value is number =>
@@ -83,10 +92,30 @@ export function isStoredAttempt(value: unknown): value is StoredAttempt {
   )
 }
 
+/**
+ * The last checked list for each key, with the exact saved text it came from. With thousands
+ * of answers saved, reading and checking the list takes a while, and it happens on every answer.
+ * If the saved text hasn't changed (compared in full, so changes from another tab are noticed),
+ * the list is reused instead.
+ */
+const listCache = new Map<string, { text: string; items: readonly unknown[] }>()
+
 /** Reads a saved list, keeping the valid entries. One bad record doesn't lose the rest. */
 function readList<T>(key: string, isItem: (value: unknown) => value is T): T[] {
-  const saved = readJson(key, (data) => (Array.isArray(data) ? data : null))
-  return saved.status === 'ok' ? saved.value.filter(isItem) : []
+  const saved = readText(key)
+  if (saved.status !== 'ok') return []
+  const cached = listCache.get(key)
+  if (cached?.text === saved.value) return [...cached.items] as T[]
+
+  let data: unknown
+  try {
+    data = JSON.parse(saved.value)
+  } catch {
+    return []
+  }
+  const items = Array.isArray(data) ? data.filter(isItem) : []
+  listCache.set(key, { text: saved.value, items })
+  return [...items]
 }
 
 const isTally = (value: unknown): value is Tally =>
@@ -100,19 +129,31 @@ const hasTallies = (value: unknown, keys: readonly string[]) =>
   value !== null &&
   keys.every((key) => isTally((value as Record<string, unknown>)[key]))
 
+const isStreaks = (value: unknown) =>
+  typeof value === 'object' &&
+  value !== null &&
+  isCount((value as HistoryArchive['streaks']).best) &&
+  isCount((value as HistoryArchive['streaks']).trailing)
+
+/**
+ * Archives saved before streaks and review totals were kept don't have them; they're read as
+ * zero (see `readArchive`), since those details are gone.
+ */
 export function isHistoryArchive(value: unknown): value is HistoryArchive {
   const archive = value as HistoryArchive | null
   return (
     isTally(archive) &&
     isCount(archive.sessionCount) &&
     hasTallies(archive.byOperation, operationKeys) &&
-    hasTallies(archive.byDifficulty, difficultyKeys)
+    hasTallies(archive.byDifficulty, difficultyKeys) &&
+    (archive.streaks === undefined || isStreaks(archive.streaks)) &&
+    (archive.review === undefined || isTally(archive.review))
   )
 }
 
 function readArchive(): HistoryArchive {
   const saved = readJson(ARCHIVE_KEY, (data) => (isHistoryArchive(data) ? data : null))
-  return saved.status === 'ok' ? saved.value : emptyArchive()
+  return saved.status === 'ok' ? { ...emptyArchive(), ...saved.value } : emptyArchive()
 }
 
 const addTo = (tally: Tally, isCorrect: boolean): Tally => ({
@@ -131,23 +172,33 @@ export function addToArchive(
     sessionCount: archive.sessionCount + sessionsRemoved,
     byOperation: { ...archive.byOperation },
     byDifficulty: { ...archive.byDifficulty },
+    // The oldest answers are archived first, so these continue on from the earlier ones.
+    streaks: streaks(attempts, archive.streaks),
   }
-  for (const { question, isCorrect } of attempts) {
+  for (const attempt of attempts) {
+    const { question, isCorrect } = attempt
     Object.assign(next, addTo(next, isCorrect))
     next.byOperation[question.operation] = addTo(next.byOperation[question.operation], isCorrect)
     next.byDifficulty[question.difficulty] = addTo(
       next.byDifficulty[question.difficulty],
       isCorrect,
     )
+    if (isMistakeReviewAttempt(attempt)) next.review = addTo(next.review, isCorrect)
   }
   return next
 }
 
-/** Saves a list; if storage is full, keeps only the newest half and tries once more. */
+/** Saves a list (and remembers it for `readList`). If storage is full, keeps only the newest half and tries once more. */
 function writeList<T>(name: string, items: T[]): WriteResult {
-  const result = writeJson(name, items)
+  const write = (list: T[]): WriteResult => {
+    const text = JSON.stringify(list)
+    const result = writeText(name, text)
+    if (result.ok) listCache.set(name, { text, items: [...list] })
+    return result
+  }
+  const result = write(items)
   if (result.ok || result.reason !== 'quota-exceeded') return result
-  return writeJson(name, items.slice(Math.floor(items.length / 2)))
+  return write(items.slice(Math.floor(items.length / 2)))
 }
 
 const byStartTime = (a: StoredSession, b: StoredSession) => a.startedAt.localeCompare(b.startedAt)

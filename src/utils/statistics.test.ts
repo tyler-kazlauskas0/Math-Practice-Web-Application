@@ -150,6 +150,8 @@ describe('calculateStatistics', () => {
         intermediate: tally(0, 0),
         advanced: tally(0, 0),
       },
+      streaks: { best: 0, trailing: 0 },
+      review: tally(0, 0),
     })
 
     expect(stats).toMatchObject({ totalAttempts: 46, correctAttempts: 34, totalSessions: 7 })
